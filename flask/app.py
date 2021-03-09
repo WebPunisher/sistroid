@@ -131,9 +131,11 @@ def student_info(student_id):
         
         cur.execute(
         '''
-        select student_id,grade from grades
+        select grades.crn,topics.class_name,grade from grades
         inner join people on 
         grades.student_id = people.person_id
+        inner join topics on 
+        topics.class_name = grades.class_name
         where people.person_id = {};
         '''.format(student_id))
 
