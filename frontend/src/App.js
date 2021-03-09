@@ -2,7 +2,7 @@ import {BrowserRouter, Switch,Route} from 'react-router-dom';
 
 import SignIn from './pages/signin/signin.component';
 import Toolbar from './components/toolbar/toolbar.component';
-import Page from './pages/anotherpage/page.component';
+import HomePage from './pages/anotherpage/page.component';
 
 import './App.css';
 
@@ -12,9 +12,8 @@ const App = props  =>{
       <BrowserRouter>
       <Toolbar/>
       <Switch>
-        <Route exact path='/'  component={SignIn}/>
-        <Route exact path='/p'  component={Page}/>
-        <Route exact path='/signin'  component={SignIn}/>
+        <Route exact path='/'  component={HomePage}/>
+        <Route exact path='/sign'  component={SignIn}/>
       </Switch>
       </BrowserRouter>
     </div>
