@@ -13,7 +13,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
 
-@app.route("/create_tables") #uwu
+@app.route("/create_tables")
 def create_tables():
     cur = mysql.connection.cursor()
     
@@ -25,7 +25,7 @@ def create_tables():
     );''')    
     
     cur.execute('''CREATE TABLE IF NOT EXISTS topics (
-    class_name CHAR(6) PRIMARY KEY,
+    class_name VARCHAR(6) PRIMARY KEY,
     class_desc VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );''')    
@@ -33,13 +33,24 @@ def create_tables():
     cur.execute('''CREATE TABLE IF NOT EXISTS classes (
     crn INT AUTO_INCREMENT PRIMARY KEY,
     c_teacher_id INT NOT NULL,
-    c_class_name CHAR(6) NOT NULL,
+    c_class_name VARCHAR(6) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(c_teacher_id)
-    REFERENCES people2 (person_id),
+    REFERENCES people (person_id),
     FOREIGN KEY(c_class_name)
     REFERENCES topics (class_name)
     );''')   
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS enrollment (
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    crn INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(student_id)
+    REFERENCES people (person_id),
+    FOREIGN KEY(crn)
+    REFERENCES classes (crn)
+    );''')        
     
     mysql.connection.commit()  
     return("success")
@@ -57,16 +68,36 @@ add_to_db_querries = {
                 INSERT INTO classes (c_class_name,c_teacher_id)
                 VALUES ('{}','{}'); 
             ''' ,
+    "enrollment": '''
+                INSERT INTO enrollment (student_id , crn)
+                VALUES ('{}','{}'); 
+            ''' ,
 }
 
 @app.route('/add_<entry>',methods = ["POST"])
 def add_to_db(entry):
-    if request.method == "POST" and entry in ["user","class","topic"]:
+    if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
         cur.execute(add_to_db_querries[entry].format(*request.json.values()))
         mysql.connection.commit()
-        return add_to_db_querries[entry].format(*request.json.values())+"added "+entry
-
+        return "added "+entry
+    
+@app.route('/<crn>/students',methods = ["GET"])
+def get_students(crn):
+    if request.method == "GET":
+        cur = mysql.connection.cursor()
+        cur.execute(
+        '''
+        select person_id,pname,psurname,c_class_name,classes.crn from classes 
+        inner join enrollment on 
+        classes.crn = enrollment.crn
+        inner join topics on
+        classes.c_class_name = topics.class_name
+        inner join people on 
+        people.person_id = enrollment.student_id;
+        ''')
+        return {"students":cur.fetchall()}
+    
 @app.route('/')
 def index():
     cur = mysql.connection.cursor()
