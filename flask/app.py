@@ -88,14 +88,15 @@ def get_students(crn):
         cur = mysql.connection.cursor()
         cur.execute(
         '''
-        select person_id,pname,psurname,c_class_name,classes.crn from classes 
+        select person_id,pname,psurname,c_class_name from classes 
         inner join enrollment on 
         classes.crn = enrollment.crn
         inner join topics on
         classes.c_class_name = topics.class_name
         inner join people on 
-        people.person_id = enrollment.student_id;
-        ''')
+        people.person_id = enrollment.student_id
+        where classes.crn = {};
+        '''.format(crn))
         return {"students":cur.fetchall()}
     
 @app.route('/')
