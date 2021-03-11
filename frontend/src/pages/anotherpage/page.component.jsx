@@ -7,23 +7,22 @@ import './assets/vendor/boxicons/css/boxicons.min.css';
 import './assets/vendor/icofont/icofont.min.css';
 import './assets/vendor/bootstrap/css/bootstrap.min.css';
 import './assets/vendor/remixicon/remixicon.css';
-import './assets/vendor/venobox/venobox.css';
-import './assets/vendor/owl.carousel/assets/owl.carousel.min.css';
 
 import banner from './assets/img/hero-img.png';
 import sarp from './assets/img/team/sarp.png'
 import talha from './assets/img/team/talha.jpg'
+import team1 from './assets/img/team/team-1.jpg';
+import team2 from './assets/img/team/team-3.jpg';
+
  const Homepage = () =>{
 
-    
-      
     return (
        
         <div className="landingpage">
             <header id="header" class="fixed-top myheader">
                 <div class="container d-flex align-items-center">
 
-                <h1 class="logo mr-auto"><a href="index.html">Sistroid</a></h1>
+                <h1 class="logo mr-auto"><a href="/">Sistroid</a></h1>
         
                
                 <nav class="nav-menu d-none d-lg-block">
@@ -266,7 +265,7 @@ import talha from './assets/img/team/talha.jpg'
 
           <div class="col-lg-6 mt-4">
             <div class="member d-flex align-items-start" data-aos="zoom-in" data-aos-delay="300">
-              <div class="pic"><img src="assets/img/team/team-3.jpg" class="img-fluid" alt=""/></div>
+              <div class="pic"><img src={team1} class="img-fluid" alt=""/></div>
               <div class="member-info">
                 <h4>Ahmet Cuneyt Tantug</h4>
                 <span>Database Administrator </span>
@@ -283,7 +282,7 @@ import talha from './assets/img/team/talha.jpg'
 
           <div class="col-lg-6 mt-4">
             <div class="member d-flex align-items-start" data-aos="zoom-in" data-aos-delay="400">
-              <div class="pic"><img src="assets/img/team/team-4.jpg" class="img-fluid" alt=""/></div>
+              <div class="pic"><img src={team2} class="img-fluid" alt=""/></div>
               <div class="member-info">
                 <h4>Yusuf Yaslan</h4>
                 <span>Infrastructure Engineer</span>
