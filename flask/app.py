@@ -111,6 +111,14 @@ add_to_db_querries = {
             ''' ,
 }
 
+delete_from_db_querries = {
+    "user" : "DELETE FROM people WHERE person_id = {}",
+    "topic" : "DELETE FROM topics WHERE class_name = {}",
+    "class" : "DELETE FROM people WHERE crn = {}",
+    "enrollment" : "DELETE FROM people WHERE enrollment_id = {}",
+    "grade" : "DELETE FROM people WHERE grade_id = {}",
+    }
+
 @app.route('/add_<entry>',methods = ["POST"])
 def add_to_db(entry):
     if request.method == "POST" and entry in add_to_db_querries:
@@ -119,6 +127,13 @@ def add_to_db(entry):
         mysql.connection.commit()
         return "added "+entry
 
+@app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
+def remove_from_db(entry,id_num):
+    if request.method == "DELETE" and entry in delete_from_db_querries:
+        cur = mysql.connection.cursor()
+        cur.execute(delete_from_db_querries[entry].format(id_num))
+        mysql.connection.commit()
+        return "removed "+id_num
 
 grade_translation={"AA":4,"BA":3.5,"BB":3,"CB":2.5,"CC":2,"DC":1.5,"DD":1,"FF":0}
 def get_avg_grade(grades, is_class=False):
