@@ -38,9 +38,13 @@ def create_tables():
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY(c_teacher_id)
-    REFERENCES people (person_id),
+    REFERENCES people (person_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
     FOREIGN KEY(c_class_name)
     REFERENCES topics (class_name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
     );''')   
 
     cur.execute('''CREATE TABLE IF NOT EXISTS enrollment (
@@ -50,9 +54,13 @@ def create_tables():
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY(student_id)
-    REFERENCES people (person_id),
+    REFERENCES people (person_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
     FOREIGN KEY(crn)
     REFERENCES classes (crn)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
     );''')   
 
     cur.execute('''CREATE TABLE IF NOT EXISTS grades (
@@ -64,11 +72,17 @@ def create_tables():
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY(student_id)
-    REFERENCES people (person_id),
+    REFERENCES people (person_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
     FOREIGN KEY(crn)
-    REFERENCES classes (crn),
+    REFERENCES classes (crn)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
     FOREIGN KEY(class_name)
     REFERENCES topics (class_name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
     );''')        
     
     mysql.connection.commit()  
@@ -104,11 +118,22 @@ def add_to_db(entry):
         cur.execute(add_to_db_querries[entry].format(*request.json.values()))
         mysql.connection.commit()
         return "added "+entry
-    
-def get_avg_grade(grades):
+
+
+grade_translation={"AA":4,"BA":3.5,"BB":3,"CB":2.5,"CC":2,"DC":1.5,"DD":1,"FF":0}
+def get_avg_grade(grades, is_class=False):
     if not grades: return 0
-    grade_translation={"AA":4,"BA":3.5,"BB":3,"CB":2.5,"CC":2,"DC":1.5,"DD":1,"FF":0}
-    return sum([grade_translation[grade] for grade in [student["grade"] for student in grades]])/len(grades)
+    
+    if is_class: 
+        return sum([grade_translation[grade] for grade in [student["grade"] for student in grades]])/len(grades)
+    
+    quality_credits=0
+    total_credits=0
+    for entry in grades:
+        quality_credits += grade_translation[entry["grade"]] * entry["credits"]
+        total_credits += entry["credits"]
+    return quality_credits/total_credits
+    
     
 @app.route('/student_info/<student_id>',methods = ["GET"])
 def student_info(student_id):
@@ -131,7 +156,7 @@ def student_info(student_id):
         
         cur.execute(
         '''
-        select grades.crn,topics.class_name,grade from grades
+        select grades.crn,topics.class_name,grade,topics.credits from grades
         inner join people on 
         grades.student_id = people.person_id
         inner join topics on 
@@ -191,7 +216,7 @@ def crn_info(crn):
 
         students = cur.fetchall()
                 
-        return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades)}
+        return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
     
 @app.route('/')
 def index():
