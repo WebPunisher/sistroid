@@ -1,4 +1,6 @@
 import React from 'react';
+import {Switch,Route} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -19,12 +21,18 @@ import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import Avatar from '@material-ui/core/Avatar';
 
+import Den from '../../components/anothercomp/x.component';
+import Den2 from '../../components/comp2/comp2.component';
+
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
   },
+  // a:{
+
+  // },
   avatar: {
     // marginTop: 10,
     width: 26,
@@ -154,10 +162,12 @@ export default function MiniDrawer() {
         </List>
         <List>
           {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
+            <Link to="/dashboard/d" >
+              <ListItem button key={text}>
+                <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+                <ListItemText primary={text} />
+              </ListItem>
+            </Link>
           ))}
         </List>
         <Divider />
@@ -172,8 +182,12 @@ export default function MiniDrawer() {
         </List>
       </Drawer>
       <main className={classes.content}>
+        <Switch>
+          <Route exact path='/dashboard/p'  component={Den}/>
+          <Route exact path='/dashboard/d'  component={Den2}/>
+        </Switch>
         <div className={classes.toolbar} />
-        <Typography paragraph>
+        {/* <Typography paragraph>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
           ut labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent elementum
           facilisis leo vel. Risus at ultrices mi tempus imperdiet. Semper risus in hendrerit
@@ -195,7 +209,7 @@ export default function MiniDrawer() {
           tortor. Habitant morbi tristique senectus et. Adipiscing elit duis tristique sollicitudin
           nibh sit. Ornare aenean euismod elementum nisi quis eleifend. Commodo viverra maecenas
           accumsan lacus vel facilisis. Nulla posuere sollicitudin aliquam ultrices sagittis orci a.
-        </Typography>
+        </Typography> */}
       </main>
     </div>
   );

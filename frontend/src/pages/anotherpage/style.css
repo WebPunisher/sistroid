@@ -260,7 +260,7 @@ div.anchor {
 /* Get Startet Button */
 .get-started-btn {
   margin-left: 25px;
-  color: #fff;
+  color: #fff  !important;
   border-radius: 50px;
   padding: 6px 25px 7px 25px;
   white-space: nowrap;
@@ -1848,4 +1848,13 @@ section {
   #footer .credits {
     padding-top: 4px;
   }
+}
+
+
+.myUl li{
+  color: white;
+}
+
+.myLinks{
+  color: white;
 }
