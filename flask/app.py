@@ -50,11 +50,11 @@ def create_tables():
     );''')   
 
     cur.execute('''CREATE TABLE IF NOT EXISTS enrollment (
-    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     crn INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
+    PRIMARY KEY (student_id,crn),
     FOREIGN KEY(student_id)
     REFERENCES people (person_id)
     ON DELETE CASCADE
@@ -66,12 +66,12 @@ def create_tables():
     );''')   
 
     cur.execute('''CREATE TABLE IF NOT EXISTS grades (
-    grade_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     crn INT NOT NULL,
     grade VARCHAR(2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
+    PRIMARY KET (student_id,crn),
     FOREIGN KEY(student_id)
     REFERENCES people (person_id)
     ON DELETE CASCADE
@@ -214,11 +214,15 @@ def student_info(student_id):
         
         cur.execute(
         '''
-        select grades.crn,topics.class_name,grade,topics.credits from grades
-        inner join people on 
+        select grades.crn,topics.class_name,grade,topics.credits from people
+        inner join grades on 
         grades.student_id = people.person_id
+        inner join enrollment on 
+        grades.crn = enrollment.crn and people.person_id = enrollment.student_id
+        inner join classes on 
+        enrollment.crn = classes.crn
         inner join topics on 
-        topics.class_name = grades.class_name
+        topics.class_name = classes.c_class_name
         where people.person_id = {};
         '''.format(student_id))
 
