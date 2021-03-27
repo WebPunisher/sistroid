@@ -5,8 +5,6 @@ import random
 # from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
 
-
-
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'sarptalha'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
@@ -71,7 +69,7 @@ def create_tables():
     grade VARCHAR(2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    PRIMARY KET (student_id,crn),
+    PRIMARY KEY (student_id,crn),
     FOREIGN KEY(student_id)
     REFERENCES people (person_id)
     ON DELETE CASCADE
@@ -113,8 +111,8 @@ delete_from_db_querries = {
     "user" : "DELETE FROM people WHERE person_id = {}",
     "topic" : "DELETE FROM topics WHERE class_name = {}",
     "class" : "DELETE FROM people WHERE crn = {}",
-    "enrollment" : "DELETE FROM people WHERE enrollment_id = {}",
-    "grade" : "DELETE FROM people WHERE grade_id = {}",
+    "grades" : "DELETE FROM grades WHERE student_id = {} and crn = {}",
+    "enrollment" : "DELETE FROM enrollment WHERE student_id = {} and crn = {}",
     }
 
 @app.route('/add_<entry>',methods = ["POST"])
@@ -127,11 +125,19 @@ def add_to_db(entry):
 
 @app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
 def remove_from_db(entry,id_num):
-    if request.method == "DELETE" and entry in delete_from_db_querries:
+    if request.method == "DELETE" and entry in ["user","topic","class"]:
         cur = mysql.connection.cursor()
         cur.execute(delete_from_db_querries[entry].format(id_num))
         mysql.connection.commit()
-        return "removed "+id_num
+        return "removed "+str(id_num)
+
+@app.route('/student_remove_<entry>/<id_num>/<crn>',methods = ["DELETE"])
+def remove_from_db_two_args(entry,id_num,crn):
+    if request.method == "DELETE" and entry in ["grades","enrollment"]:
+        cur = mysql.connection.cursor()
+        cur.execute(delete_from_db_querries[entry].format(id_num,crn))
+        mysql.connection.commit()
+        return "removed "+str(id_num)
 
 @app.route("/clear_all_tables")
 def clear_all_tables():
@@ -192,6 +198,22 @@ def get_avg_grade(grades, is_class=False):
         total_credits += entry["credits"]
     return quality_credits/total_credits
     
+    
+@app.route('/ranking',methods = ["GET"])
+def get_ranking():
+    cur = mysql.connection.cursor()
+    
+    cur.execute("select * from people")
+    
+    people = cur.fetchall()
+    GPA_LIST=[]
+    for person in people:
+        person_name = person["pname"] + " " + person["psurname"]
+        person_gpa = student_info(person["person_id"])["GPA"]
+        GPA_LIST.append((person_name,person_gpa))
+        
+    GPA_LIST.sort(key = lambda x: x[1],reverse=True)
+    return {i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)}
     
 @app.route('/student_info/<student_id>',methods = ["GET"])
 def student_info(student_id):
