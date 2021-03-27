@@ -1,0 +1,7 @@
+{
+    "people": ["Paul Doran", "John Dinkins", "Steve Ferry", "Carl Zeller", "Frank Shaffer", "Walter Lewis", "Ty Rice", "Victor Ebner", "Matthew Schickowski","Carl Schwager", "Monte Schlicht", "Ike Haworth", "Steve Aikin", "David Schmitt", "Alex Mills", "Mark Doran", "Hal Frick", "Peter Irwin", "Dan Doran", "Fred Schwager", "Ty Fletcher", "Dan Caswell", "Walter Vogal", "Walter Resnick", "Hal Fletcher", "Fred Pak", "John Aikin", "Ike Sonderling", "John Knutson", "Paul Christensen", "Jack Eastman", "Thomas Sagar", "Otto Jenson", "Aaron Zeller", "David Sonderling", "Fred Nugent", "Ben Schmitt", "Nathan Linde", "Joe Celedon", "Mark LePage", "Ty Schickowski", "Paul Ostrander", "Carl Miller", "Nathan Jones", "Steve Ory", "Alex Sandstrom", "John Bateman", "Carl Mccord", "Victor Cannon", "Otto Vail"],
+    "teachers":["Paul Doran", "John Dinkins", "Steve Ferry", "Carl Zeller", "Frank Shaffer", "Walter Lewis", "Ty Rice", "Victor Ebner", "Matthew Schickowski"],
+    "topics": ["ISE301" , "ISE302" , "ISE303" , "ISE304" , "ISE305" , "ISE306" , "ISE307" , "ISE308" , "ISE309" , "ISE310" , "ISE311" , "ISE312" , "ISE313" , "ISE314" , "ISE315"]
+
+
+}

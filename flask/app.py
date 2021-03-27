@@ -1,15 +1,17 @@
 from flask import Flask,request
 from flask_mysqldb import MySQL
-from flask_httpauth import HTTPBasicAuth
-
+import json
+import random
+# from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
+
+
 
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'sarptalha'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-
 
 mysql = MySQL(app)
 
@@ -66,7 +68,6 @@ def create_tables():
     cur.execute('''CREATE TABLE IF NOT EXISTS grades (
     grade_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
-    class_name VARCHAR(6) NOT NULL,
     crn INT NOT NULL,
     grade VARCHAR(2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -78,15 +79,12 @@ def create_tables():
     FOREIGN KEY(crn)
     REFERENCES classes (crn)
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-    FOREIGN KEY(class_name)
-    REFERENCES topics (class_name)
-    ON DELETE CASCADE
     ON UPDATE CASCADE
     );''')        
     
     mysql.connection.commit()  
     return("success")
+
 
 add_to_db_querries = {
     "user": '''
@@ -106,8 +104,8 @@ add_to_db_querries = {
                 VALUES ('{}','{}'); 
             ''' ,
     "grade": '''
-                INSERT INTO grades (student_id , class_name, grade, crn)
-                VALUES ('{}','{}','{}',{}); 
+                INSERT INTO grades (student_id , grade, crn)
+                VALUES ('{}','{}',{}); 
             ''' ,
 }
 
@@ -134,6 +132,51 @@ def remove_from_db(entry,id_num):
         cur.execute(delete_from_db_querries[entry].format(id_num))
         mysql.connection.commit()
         return "removed "+id_num
+
+@app.route("/clear_all_tables")
+def clear_all_tables():
+    cur = mysql.connection.cursor()
+    cur.execute( '''
+            SET FOREIGN_KEY_CHECKS = 0;
+            truncate people;
+            truncate topics;
+            truncate classes;
+            truncate enrollment;
+            truncate grades;
+            SET FOREIGN_KEY_CHECKS = 1;
+              ''')
+    # mysql.connection.commit()
+    return ("successfully cleared all the tables")
+
+@app.route("/deneme")
+def deneme():
+    
+    with open('./seeddata.json') as json_file:
+        cur = mysql.connection.cursor()
+        data = json.load(json_file)
+
+        for i in data['people']:
+            cur.execute('''  INSERT INTO people (pname,psurname) VALUES ('{}','{}'); '''.format(i.split(" ")[0],i.split(" ")[1]))
+        
+        for i in data['topics']:
+            cur.execute('''INSERT INTO topics (class_name,class_desc,credits) VALUES ('{}','{}',{}); '''.format(i,"Temporary description",random.randint(2,4)))
+        
+        for i in range(20):
+            cur.execute(''' INSERT INTO classes (c_class_name,c_teacher_id) VALUES ('{}',{}); '''.format(data['topics'][i%15],i%9+1))
+
+        crn_dict = {}
+        for i in range(9,50):
+            num = random.randint(1,16)
+            crn_dict[i] = [num,(num+1)%15+1,(num+2)%15+1,(num+3)%15+1]
+            for j in crn_dict[i]:
+                cur.execute('''INSERT INTO enrollment (student_id , crn)VALUES ({},{}); '''.format(i,j))
+    
+        for enrol in crn_dict:
+            for crn_num in crn_dict[enrol]:
+                cur.execute('''INSERT INTO grades (student_id , grade, crn) VALUES ('{}','{}',{});'''.format(enrol,list(grade_translation.keys())[random.randint(0,7)],crn_num))
+
+        mysql.connection.commit()
+        return ("success1")
 
 grade_translation={"AA":4,"BA":3.5,"BB":3,"CB":2.5,"CC":2,"DC":1.5,"DD":1,"FF":0}
 def get_avg_grade(grades, is_class=False):
