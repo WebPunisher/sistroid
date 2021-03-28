@@ -1,5 +1,6 @@
-from flask import Flask,request
+from flask import Flask,request,jsonify
 from flask_mysqldb import MySQL
+from flask_cors import cross_origin
 import json
 import random
 # from flask_httpauth import HTTPBasicAuth
@@ -14,6 +15,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
 @app.route("/create_tables")
+@cross_origin()
 def create_tables():
     cur = mysql.connection.cursor()
     
@@ -116,6 +118,7 @@ delete_from_db_querries = {
     }
 
 @app.route('/add_<entry>',methods = ["POST"])
+@cross_origin()
 def add_to_db(entry):
     if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
@@ -124,6 +127,7 @@ def add_to_db(entry):
         return "added "+entry
 
 @app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
+@cross_origin()
 def remove_from_db(entry,id_num):
     if request.method == "DELETE" and entry in ["user","topic","class"]:
         cur = mysql.connection.cursor()
@@ -132,6 +136,7 @@ def remove_from_db(entry,id_num):
         return "removed "+str(id_num)
 
 @app.route('/student_remove_<entry>/<id_num>/<crn>',methods = ["DELETE"])
+@cross_origin()
 def remove_from_db_two_args(entry,id_num,crn):
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
@@ -140,6 +145,7 @@ def remove_from_db_two_args(entry,id_num,crn):
         return "removed "+str(id_num)
 
 @app.route("/clear_all_tables")
+@cross_origin()
 def clear_all_tables():
     cur = mysql.connection.cursor()
     cur.execute( '''
@@ -155,6 +161,7 @@ def clear_all_tables():
     return ("successfully cleared all the tables")
 
 @app.route("/deneme")
+@cross_origin()
 def deneme():
     
     with open('./seeddata.json') as json_file:
@@ -196,6 +203,7 @@ def get_avg_grade(grades, is_class=False):
     for entry in grades:
         quality_credits += grade_translation[entry["grade"]] * entry["credits"]
         total_credits += entry["credits"]
+    
     return quality_credits/total_credits
     
     
@@ -213,7 +221,10 @@ def get_ranking():
         GPA_LIST.append((person_name,person_gpa))
         
     GPA_LIST.sort(key = lambda x: x[1],reverse=True)
-    return {i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)}
+    response = jsonify({i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+    
     
 @app.route('/student_info/<student_id>',methods = ["GET"])
 def student_info(student_id):
@@ -257,7 +268,10 @@ def student_info(student_id):
         
         info= cur.fetchone()
         
-        return {"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info}
+        response = jsonify({"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
+        
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
 def crn_info(crn):
@@ -300,7 +314,9 @@ def crn_info(crn):
 
         students = cur.fetchall()
                 
-        return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
+        response= jsonify({"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
     
 @app.route('/')
 def index():
@@ -318,4 +334,4 @@ def index():
     return str(resultarr)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=1999)
+    app.run(debug=True, port=5000)
