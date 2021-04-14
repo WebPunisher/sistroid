@@ -1,6 +1,5 @@
-from flask import Flask,request,jsonify
+from flask import Flask,request
 from flask_mysqldb import MySQL
-from flask_cors import cross_origin
 import json
 import random
 # from flask_httpauth import HTTPBasicAuth
@@ -15,7 +14,6 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
 @app.route("/create_tables")
-@cross_origin()
 def create_tables():
     cur = mysql.connection.cursor()
     
@@ -89,63 +87,59 @@ def create_tables():
 add_to_db_querries = {
     "user": '''
                 INSERT INTO people (pname,psurname)
-                VALUES ('{}','{}'); 
+                VALUES (%s,%s); 
             ''' ,
     "topic": '''
                 INSERT INTO topics (class_name,class_desc,credits)
-                VALUES ('{}','{}',{}); 
+                VALUES (%s,%s,%s); 
             ''' ,
     "class": '''
                 INSERT INTO classes (c_class_name,c_teacher_id)
-                VALUES ('{}','{}'); 
+                VALUES (%s,%s); 
             ''' ,
     "enrollment": '''
                 INSERT INTO enrollment (student_id , crn)
-                VALUES ('{}','{}'); 
+                VALUES (%s,%s); 
             ''' ,
     "grade": '''
                 INSERT INTO grades (student_id , grade, crn)
-                VALUES ('{}','{}',{}); 
+                VALUES (%s,%s,%s); 
             ''' ,
 }
 
 delete_from_db_querries = {
-    "user" : "DELETE FROM people WHERE person_id = {}",
-    "topic" : "DELETE FROM topics WHERE class_name = {}",
-    "class" : "DELETE FROM people WHERE crn = {}",
-    "grades" : "DELETE FROM grades WHERE student_id = {} and crn = {}",
-    "enrollment" : "DELETE FROM enrollment WHERE student_id = {} and crn = {}",
+    "user" : "DELETE FROM people WHERE person_id = %s",
+    "topic" : "DELETE FROM topics WHERE class_name = %s",
+    "class" : "DELETE FROM people WHERE crn = %s",
+    "grades" : "DELETE FROM grades WHERE student_id = %s and crn = %s",
+    "enrollment" : "DELETE FROM enrollment WHERE student_id = %s and crn = %s",
     }
 
 @app.route('/add_<entry>',methods = ["POST"])
-@cross_origin()
 def add_to_db(entry):
     if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
-        cur.execute(add_to_db_querries[entry].format(*request.json.values()))
+        cur.execute(add_to_db_querries[entry],(tuple(request.json.values())))
         mysql.connection.commit()
         return "added "+entry
 
 @app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
-@cross_origin()
 def remove_from_db(entry,id_num):
     if request.method == "DELETE" and entry in ["user","topic","class"]:
         cur = mysql.connection.cursor()
-        cur.execute(delete_from_db_querries[entry].format(id_num))
+        cur.execute(delete_from_db_querries[entry],(id_num))
         mysql.connection.commit()
         return "removed "+str(id_num)
 
 @app.route('/student_remove_<entry>/<id_num>/<crn>',methods = ["DELETE"])
-@cross_origin()
 def remove_from_db_two_args(entry,id_num,crn):
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
-        cur.execute(delete_from_db_querries[entry].format(id_num,crn))
+        cur.execute(delete_from_db_querries[entry],(id_num,crn))
         mysql.connection.commit()
         return "removed "+str(id_num)
 
 @app.route("/clear_all_tables")
-@cross_origin()
 def clear_all_tables():
     cur = mysql.connection.cursor()
     cur.execute( '''
@@ -161,7 +155,6 @@ def clear_all_tables():
     return ("successfully cleared all the tables")
 
 @app.route("/deneme")
-@cross_origin()
 def deneme():
     
     with open('./seeddata.json') as json_file:
@@ -169,24 +162,24 @@ def deneme():
         data = json.load(json_file)
 
         for i in data['people']:
-            cur.execute('''  INSERT INTO people (pname,psurname) VALUES ('{}','{}'); '''.format(i.split(" ")[0],i.split(" ")[1]))
+            cur.execute('''  INSERT INTO people (pname,psurname) VALUES (%s,%s); ''',(i.split(" ")[0],i.split(" ")[1]))
         
         for i in data['topics']:
-            cur.execute('''INSERT INTO topics (class_name,class_desc,credits) VALUES ('{}','{}',{}); '''.format(i,"Temporary description",random.randint(2,4)))
+            cur.execute('''INSERT INTO topics (class_name,class_desc,credits) VALUES (%s,%s,%s); ''',(i,"Temporary description",random.randint(2,4)))
         
         for i in range(20):
-            cur.execute(''' INSERT INTO classes (c_class_name,c_teacher_id) VALUES ('{}',{}); '''.format(data['topics'][i%15],i%9+1))
+            cur.execute(''' INSERT INTO classes (c_class_name,c_teacher_id) VALUES (%s,%s); ''',(data['topics'][i%15],i%9+1))
 
-        crn_dict = {}
+        crn_dict = dict()
         for i in range(9,50):
             num = random.randint(1,16)
             crn_dict[i] = [num,(num+1)%15+1,(num+2)%15+1,(num+3)%15+1]
             for j in crn_dict[i]:
-                cur.execute('''INSERT INTO enrollment (student_id , crn)VALUES ({},{}); '''.format(i,j))
+                cur.execute('''INSERT INTO enrollment (student_id , crn)VALUES (%s,%s); ''',(i,j))
     
         for enrol in crn_dict:
             for crn_num in crn_dict[enrol]:
-                cur.execute('''INSERT INTO grades (student_id , grade, crn) VALUES ('{}','{}',{});'''.format(enrol,list(grade_translation.keys())[random.randint(0,7)],crn_num))
+                cur.execute('''INSERT INTO grades (student_id , grade, crn) VALUES (%s,%s,%s);''',(enrol,list(grade_translation.keys())[random.randint(0,7)],crn_num))
 
         mysql.connection.commit()
         return ("success1")
@@ -203,7 +196,6 @@ def get_avg_grade(grades, is_class=False):
     for entry in grades:
         quality_credits += grade_translation[entry["grade"]] * entry["credits"]
         total_credits += entry["credits"]
-    
     return quality_credits/total_credits
     
     
@@ -221,10 +213,7 @@ def get_ranking():
         GPA_LIST.append((person_name,person_gpa))
         
     GPA_LIST.sort(key = lambda x: x[1],reverse=True)
-    response = jsonify({i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)})
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-    
+    return {i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)}
     
 @app.route('/student_info/<student_id>',methods = ["GET"])
 def student_info(student_id):
@@ -240,8 +229,8 @@ def student_info(student_id):
         classes.c_class_name = topics.class_name
         inner join people on 
         people.person_id = enrollment.student_id
-        where people.person_id = {};
-        '''.format(student_id))
+        where people.person_id = %s;
+        ''',(student_id,))
         
         classes = cur.fetchall()
         
@@ -256,22 +245,19 @@ def student_info(student_id):
         enrollment.crn = classes.crn
         inner join topics on 
         topics.class_name = classes.c_class_name
-        where people.person_id = {};
-        '''.format(student_id))
+        where people.person_id = %s;
+        ''',(student_id,))
 
         grades = cur.fetchall()
         
         cur.execute(
         '''
-        select pname,psurname from people where person_id = {}
-        '''.format(student_id))       
+        select pname,psurname from people where person_id = %s
+        ''',(student_id,))       
         
         info= cur.fetchone()
         
-        response = jsonify({"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info})
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
-        
+        return {"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info}
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
 def crn_info(crn):
@@ -285,8 +271,8 @@ def crn_info(crn):
         classes.c_teacher_id = people.person_id
         inner join topics on
         classes.c_class_name = topics.class_name
-        where classes.crn = {};
-        '''.format(crn))
+        where classes.crn = %s;
+        ''',(crn,))
         
         info = cur.fetchone()
         
@@ -295,8 +281,8 @@ def crn_info(crn):
         select student_id,grade from grades
         inner join people on 
         grades.student_id = people.person_id
-        where grades.crn = {};
-        '''.format(crn))
+        where grades.crn = %s;
+        ''',(crn,))
 
         grades = cur.fetchall()
         
@@ -309,14 +295,19 @@ def crn_info(crn):
         classes.c_class_name = topics.class_name
         inner join people on 
         people.person_id = enrollment.student_id
-        where classes.crn = {};
-        '''.format(crn))
+        where classes.crn = %s;
+        ''',(crn,))
 
         students = cur.fetchall()
                 
-        response= jsonify({"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)})
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
+        return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
+    
+@app.route('/reset')
+def reset_db():
+    clear_all_tables()
+    create_tables()
+    deneme()
+    return ("reseted database")
     
 @app.route('/')
 def index():
@@ -334,4 +325,4 @@ def index():
     return str(resultarr)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=1999)
