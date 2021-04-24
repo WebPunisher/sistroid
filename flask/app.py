@@ -303,17 +303,11 @@ def crn_info(crn):
         students = cur.fetchall()
                 
         return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
-    
-@app.route('/histogram/<crn>',methods = ["GET"])
-def get_class_histogram(crn):
-    
+   
+def send_histogram(grades):
     img = cv2.imread("grade_template.png", 1)
-    info = crn_info(crn)
     font = cv2.FONT_HERSHEY_PLAIN
     
-    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
-    for grade in info["grades"]:
-        grades[grade["grade"]]+=1
     counts = list(grades.values())
     mode_grade_count = max(counts)
     
@@ -325,7 +319,59 @@ def get_class_histogram(crn):
     
     data = cv2.imencode('.png', img)[1].tobytes()
     return Response(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + data + b'\r\n\r\n', mimetype='multipart/x-mixed-replace; boundary=frame')
+      
     
+@app.route('/crn_histogram/<crn>',methods = ["GET"])
+def get_crn_histogram(crn):
+    info = crn_info(crn)    
+    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
+    for grade in info["grades"]:
+        grades[grade["grade"]]+=1
+        
+    return send_histogram(grades)
+    
+@app.route('/class_histogram/<class_name>',methods = ["GET"])
+def get_class_histogram(class_name):
+    cur = mysql.connection.cursor()     
+    
+    cur.execute("""
+    select grade,count(*) from grades,classes,topics 
+    where
+    
+    topics.class_name = classes.c_class_name and
+    grades.crn = classes.crn and
+    topics.class_name = %s
+    
+    group by grade;
+    """,(class_name,))
+    
+    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
+    data = cur.fetchall()
+    for row in data:
+        grades[row["grade"]] = row["count(*)"]
+        
+    return send_histogram(grades)
+    
+@app.route('/person_histogram/<person_id>',methods = ["GET"])
+def get_person_histogram(person_id):
+    cur = mysql.connection.cursor()     
+    
+    cur.execute("""
+    select grade,count(*) from grades,classes,people
+    where
+    classes.c_teacher_id = people.person_id and
+    grades.crn = classes.crn and
+    people.person_id = %s 
+    group by grade;
+    """,(person_id,))
+    
+    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
+    data = cur.fetchall()
+    for row in data:
+        grades[row["grade"]] = row["count(*)"]
+        
+    return send_histogram(grades)
+  
 @app.route('/reset')
 def reset_db():
     clear_all_tables()
