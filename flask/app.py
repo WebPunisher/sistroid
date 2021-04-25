@@ -1,8 +1,8 @@
-from flask import Flask,request,make_response,Response
+from flask import Flask,request
 from flask_mysqldb import MySQL
 import json
 import random
-import cv2
+import histogram
 
 # from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
@@ -303,96 +303,6 @@ def crn_info(crn):
         students = cur.fetchall()
                 
         return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
-   
-def send_histogram(grades):
-    img = cv2.imread("grade_template.png", 1)
-    font = cv2.FONT_HERSHEY_PLAIN
-    
-    counts = list(grades.values())
-    mode_grade_count = max(counts)
-    
-    for i in range(len(grade_translation)):
-        height = int(497-397*(counts[i]/mode_grade_count))
-        cv2.rectangle(img,(i*85+80,497),(i*85+130,height),(0,200,150),-1)
-        count_str = str(counts[i])
-        cv2.putText(img,count_str,(i*85+80+(15 if len(count_str)==1 else 0),490),font,2,(0,0,0),3)
-    
-    data = cv2.imencode('.png', img)[1].tobytes()
-    return Response(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + data + b'\r\n\r\n', mimetype='multipart/x-mixed-replace; boundary=frame')
-      
-    
-@app.route('/crn_histogram/<crn>',methods = ["GET"])
-def get_crn_histogram(crn):
-    info = crn_info(crn)    
-    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
-    for grade in info["grades"]:
-        grades[grade["grade"]]+=1
-        
-    return send_histogram(grades)
-    
-@app.route('/class_histogram/<class_name>',methods = ["GET"])
-def get_class_histogram(class_name):
-    cur = mysql.connection.cursor()     
-    
-    cur.execute("""
-    select grade,count(*) from grades,classes,topics 
-    where
-    
-    topics.class_name = classes.c_class_name and
-    grades.crn = classes.crn and
-    topics.class_name = %s
-    
-    group by grade;
-    """,(class_name,))
-    
-    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
-    data = cur.fetchall()
-    for row in data:
-        grades[row["grade"]] = row["count(*)"]
-        
-    return send_histogram(grades)
-    
-@app.route('/teacher_histogram/<person_id>',methods = ["GET"])
-def get_teacher_histogram(person_id):
-    cur = mysql.connection.cursor()     
-    
-    cur.execute("""
-    select grade,count(*) from grades,classes,people
-    where
-    classes.c_teacher_id = people.person_id and
-    grades.crn = classes.crn and
-    people.person_id = %s 
-    group by grade;
-    """,(person_id,))
-    
-    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
-    data = cur.fetchall()
-    for row in data:
-        grades[row["grade"]] = row["count(*)"]
-        
-    return send_histogram(grades)
-    
-@app.route('/teacher_class_histogram/<person_id>/<class_id>',methods = ["GET"])
-def get_teacher_class_histogram(person_id,class_id):
-    cur = mysql.connection.cursor()     
-    
-    cur.execute("""
-    select grade,count(*) from grades,classes,people,topics
-    where
-    topics.class_name = classes.c_class_name and
-    classes.c_teacher_id = people.person_id and
-    grades.crn = classes.crn and
-    people.person_id = %s and
-    topics.class_name =  %s
-    group by grade;
-    """,(person_id,class_id))
-    
-    grades={"AA":0,"BA":0,"BB":0,"CB":0,"CC":0,"DC":0,"DD":0,"FF":0}
-    data = cur.fetchall()
-    for row in data:
-        grades[row["grade"]] = row["count(*)"]
-        
-    return send_histogram(grades)
   
 @app.route('/reset')
 def reset_db():
@@ -401,6 +311,22 @@ def reset_db():
     deneme()
     return ("reseted database")
     
+@app.route('/crn_histogram/<crn>',methods = ["GET"])
+def crn_histogram(crn): 
+    return histogram.get_crn_histogram(crn)
+
+@app.route('/class_histogram/<class_name>',methods = ["GET"])
+def class_histogram(class_name):
+    return histogram.get_class_histogram(class_name)
+
+@app.route('/teacher_histogram/<person_id>',methods = ["GET"]) 
+def teacher_histogram(person_id): 
+    return histogram.get_teacher_histogram(person_id)
+
+@app.route('/teacher_class_histogram/<person_id>/<class_id>',methods = ["GET"])
+def teacher_class_histogram(person_id,class_id):
+    return histogram.get_teacher_class_histogram(person_id,class_id)
+
 @app.route('/')
 def index():
     cur = mysql.connection.cursor()
