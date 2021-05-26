@@ -80,7 +80,29 @@ def create_tables():
     REFERENCES classes (crn)
     ON DELETE CASCADE
     ON UPDATE CASCADE
-    );''')        
+    );''')       
+    
+    mysql.connection.commit()  
+       
+    cur.execute(
+    '''
+    create or replace view teachers AS
+    SELECT distinct people.person_id, people.pname, people.psurname, people.created_at
+    FROM people,classes
+    WHERE classes.c_teacher_id = people.person_id;
+    ''')
+    
+    cur.execute(
+     '''
+    create or replace view students AS
+    SELECT distinct people.person_id, people.pname, people.psurname, people.created_at
+    FROM 
+    people left outer join classes
+    on
+    classes.c_teacher_id = people.person_id
+    where crn is null;
+    '''
+    )    
     
     mysql.connection.commit()  
     return("success")
@@ -205,7 +227,7 @@ def get_avg_grade(grades, is_class=False):
 def get_ranking():
     cur = mysql.connection.cursor()
     
-    cur.execute("select * from people")
+    cur.execute("select * from students")
     
     people = cur.fetchall()
     GPA_LIST=[]
@@ -229,32 +251,32 @@ def student_info(student_id):
         classes.crn = enrollment.crn
         inner join topics on
         classes.c_class_name = topics.class_name
-        inner join people on 
-        people.person_id = enrollment.student_id
-        where people.person_id = %s;
+        inner join students on 
+        students.person_id = enrollment.student_id
+        where students.person_id = %s;
         ''',(student_id,))
         
         classes = cur.fetchall()
         
         cur.execute(
         '''
-        select grades.crn,topics.class_name,grade,topics.credits from people
+        select grades.crn,topics.class_name,grade,topics.credits from students
         inner join grades on 
-        grades.student_id = people.person_id
+        grades.student_id = students.person_id
         inner join enrollment on 
-        grades.crn = enrollment.crn and people.person_id = enrollment.student_id
+        grades.crn = enrollment.crn and students.person_id = enrollment.student_id
         inner join classes on 
         enrollment.crn = classes.crn
         inner join topics on 
         topics.class_name = classes.c_class_name
-        where people.person_id = %s;
+        where students.person_id = %s;
         ''',(student_id,))
 
         grades = cur.fetchall()
         
         cur.execute(
         '''
-        select pname,psurname from people where person_id = %s
+        select pname,psurname from students where person_id = %s
         ''',(student_id,))       
         
         info= cur.fetchone()
