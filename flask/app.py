@@ -1,4 +1,5 @@
-from flask import Flask,request
+from flask import Flask,request,jsonify
+from flask_cors import cross_origin
 from flask_mysqldb import MySQL
 import json
 import random
@@ -8,7 +9,7 @@ import histogram
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'sarptalha'
+app.config['MYSQL_PASSWORD'] = 'passw0rd'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
@@ -16,6 +17,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
 @app.route("/create_tables")
+@cross_origin()
 def create_tables():
     cur = mysql.connection.cursor()
     
@@ -140,6 +142,7 @@ delete_from_db_querries = {
     }
 
 @app.route('/add_<entry>',methods = ["POST"])
+@cross_origin()
 def add_to_db(entry):
     if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
@@ -148,6 +151,7 @@ def add_to_db(entry):
         return "added "+entry
 
 @app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
+@cross_origin()
 def remove_from_db(entry,id_num):
     if request.method == "DELETE" and entry in ["user","topic","class"]:
         cur = mysql.connection.cursor()
@@ -156,6 +160,7 @@ def remove_from_db(entry,id_num):
         return "removed "+str(id_num)
 
 @app.route('/student_remove_<entry>/<id_num>/<crn>',methods = ["DELETE"])
+@cross_origin()
 def remove_from_db_two_args(entry,id_num,crn):
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
@@ -164,6 +169,7 @@ def remove_from_db_two_args(entry,id_num,crn):
         return "removed "+str(id_num)
 
 @app.route("/clear_all_tables")
+@cross_origin()
 def clear_all_tables():
     cur = mysql.connection.cursor()
     cur.execute( '''
@@ -179,6 +185,7 @@ def clear_all_tables():
     return ("successfully cleared all the tables")
 
 @app.route("/deneme")
+@cross_origin()
 def deneme():
     
     with open('./seeddata.json') as json_file:
@@ -224,6 +231,7 @@ def get_avg_grade(grades, is_class=False):
     
     
 @app.route('/ranking',methods = ["GET"])
+@cross_origin()
 def get_ranking():
     cur = mysql.connection.cursor()
     
@@ -233,13 +241,17 @@ def get_ranking():
     GPA_LIST=[]
     for person in people:
         person_name = person["pname"] + " " + person["psurname"]
-        person_gpa = student_info(person["person_id"])["GPA"]
+        print("person=",person)
+        person_gpa = student_info(person["person_id"]).data()["GPA"]
         GPA_LIST.append((person_name,person_gpa))
         
     GPA_LIST.sort(key = lambda x: x[1],reverse=True)
-    return {i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)}
+    response = jsonify({i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
     
 @app.route('/student_info/<student_id>',methods = ["GET"])
+@cross_origin()
 def student_info(student_id):
     if request.method == "GET":
         cur = mysql.connection.cursor()   
@@ -281,9 +293,12 @@ def student_info(student_id):
         
         info= cur.fetchone()
         
-        return {"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info}
+        response = jsonify({"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
+@cross_origin()
 def crn_info(crn):
     if request.method == "GET":
         cur = mysql.connection.cursor()
@@ -324,9 +339,12 @@ def crn_info(crn):
 
         students = cur.fetchall()
                 
-        return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
+        response= jsonify({"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
   
 @app.route('/reset')
+@cross_origin()
 def reset_db():
     clear_all_tables()
     create_tables()
@@ -334,22 +352,27 @@ def reset_db():
     return ("reseted database")
     
 @app.route('/crn_histogram/<crn>',methods = ["GET"])
+@cross_origin()
 def crn_histogram(crn): 
     return histogram.get_crn_histogram(crn)
 
 @app.route('/class_histogram/<class_name>',methods = ["GET"])
+@cross_origin()
 def class_histogram(class_name):
     return histogram.get_class_histogram(class_name)
 
 @app.route('/teacher_histogram/<person_id>',methods = ["GET"]) 
+@cross_origin()
 def teacher_histogram(person_id): 
     return histogram.get_teacher_histogram(person_id)
 
 @app.route('/teacher_class_histogram/<person_id>/<class_id>',methods = ["GET"])
+@cross_origin()
 def teacher_class_histogram(person_id,class_id):
     return histogram.get_teacher_class_histogram(person_id,class_id)
 
 @app.route('/')
+@cross_origin()
 def index():
     cur = mysql.connection.cursor()
 

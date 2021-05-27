@@ -7,7 +7,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 
 import Drawere from './drawer.component';
-import Den from '../../components/anothercomp/x.component';
+import Ranking from '../../components/ranking/ranking.component';
 import Den2 from '../../components/comp2/comp2.component';
 
 const useStyles = makeStyles((theme) => ({
@@ -40,7 +40,7 @@ const Dashboard = ()  => {
       <main className={classes.content}>
         <div className={classes.toolbar} />
         <Switch>
-          <Route exact path='/dashboard/p'  component={Den}/>
+          <Route exact path='/dashboard/ranking'  component={Ranking}/>
           <Route exact path='/dashboard/d'  component={Den2}/>
         </Switch>
 

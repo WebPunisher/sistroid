@@ -3,14 +3,14 @@ import React,{useState,useEffect} from 'react';
 import axios from '../../axios';
 
 
-const Deneme = () => {
+const Ranking = () => {
 
     const [ranking,setRanking] = useState()
 
     useEffect(()=>{
         axios.get('/ranking').then( res =>{
             setRanking(res.data)
-            // console.log(Object.values(res.data))
+            console.log(Object.values(res.data))
         })
     },[]) ;
 
@@ -28,4 +28,4 @@ const Deneme = () => {
 }
 
 
-export default Deneme;
+export default Ranking;
