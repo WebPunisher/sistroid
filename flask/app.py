@@ -9,7 +9,7 @@ import histogram
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'passw0rd'
+app.config['MYSQL_PASSWORD'] = 'sarptalha'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
@@ -242,7 +242,7 @@ def get_ranking():
     for person in people:
         person_name = person["pname"] + " " + person["psurname"]
         print("person=",person)
-        person_gpa = student_info(person["person_id"]).data()["GPA"]
+        person_gpa = get_student_info(person["person_id"])["GPA"]
         GPA_LIST.append((person_name,person_gpa))
         
     GPA_LIST.sort(key = lambda x: x[1],reverse=True)
@@ -253,6 +253,11 @@ def get_ranking():
 @app.route('/student_info/<student_id>',methods = ["GET"])
 @cross_origin()
 def student_info(student_id):
+    response = jsonify(get_student_info(student_id))
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response    
+    
+def get_student_info(student_id):
     if request.method == "GET":
         cur = mysql.connection.cursor()   
         
@@ -293,9 +298,7 @@ def student_info(student_id):
         
         info= cur.fetchone()
         
-        response = jsonify({"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info})
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
+        return {"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info}
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
 @cross_origin()
