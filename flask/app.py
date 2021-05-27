@@ -233,7 +233,7 @@ def get_avg_grade(grades, is_class=False):
     return quality_credits/total_credits
     
     
-@app.route('/dashboard/ranking',methods = ["GET"])
+@app.route('/ranking',methods = ["GET"])
 @cross_origin()
 def get_ranking():
     cur = mysql.connection.cursor()
