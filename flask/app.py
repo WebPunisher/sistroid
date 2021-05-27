@@ -25,6 +25,8 @@ def create_tables():
     person_id INT AUTO_INCREMENT PRIMARY KEY,
     pname VARCHAR(255) NOT NULL,
     psurname VARCHAR(255) NOT NULL,
+    mail VARCHAR(255) ,
+    major VARCHAR(3) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );''')    
     
@@ -32,6 +34,7 @@ def create_tables():
     class_name VARCHAR(6) PRIMARY KEY,
     class_desc VARCHAR(255),
     credits INT NOT NULL,
+    major VARCHAR(3) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );''')    
     
@@ -230,7 +233,7 @@ def get_avg_grade(grades, is_class=False):
     return quality_credits/total_credits
     
     
-@app.route('/ranking',methods = ["GET"])
+@app.route('/dashboard/ranking',methods = ["GET"])
 @cross_origin()
 def get_ranking():
     cur = mysql.connection.cursor()
