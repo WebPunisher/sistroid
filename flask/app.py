@@ -9,7 +9,7 @@ import histogram
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'sarptalha'
+app.config['MYSQL_PASSWORD'] = 'passw0rd'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
@@ -250,7 +250,6 @@ def get_ranking():
         
     GPA_LIST.sort(key = lambda x: x[1],reverse=True)
     response = jsonify({i:GPA_LIST[i-1] for i in range(1,len(GPA_LIST)+1)})
-    response.headers.add("Access-Control-Allow-Origin", "*")
     return response
     
 @app.route('/student_info/<student_id>',methods = ["GET"])
