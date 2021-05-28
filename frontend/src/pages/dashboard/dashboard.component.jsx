@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 
 import Drawere from './drawer.component';
 import Ranking from '../../components/ranking/ranking.component';
+import MyClasses from '../../components/myclasses/myclasses.component';
 import Den2 from '../../components/comp2/comp2.component';
 
 const useStyles = makeStyles((theme) => ({
@@ -42,6 +43,7 @@ const Dashboard = ()  => {
         <Switch>
           <Route exact path='/dashboard/ranking'  component={Ranking}/>
           <Route exact path='/dashboard/d'  component={Den2}/>
+          <Route path='/dashboard/student_info/'  component={MyClasses}/>
         </Switch>
 
         {/* <Typography paragraph>

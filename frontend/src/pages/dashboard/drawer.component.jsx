@@ -20,6 +20,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import Avatar from '@material-ui/core/Avatar';
+import ColorizeIcon from '@material-ui/icons/Colorize';
+import ClassIcon from '@material-ui/icons/Class';
 
 const drawerWidth = 240;
 
@@ -171,13 +173,22 @@ const Drawere = ()  => {
         </List>
         <Divider />
         <List>
-          {['All mail', 'Trash', 'Spam', 'Random'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text} />
+          <Link to="/dashboard/ranking" >
+            <ListItem button>
+                <ListItemIcon><ColorizeIcon /></ListItemIcon>
+                <ListItemText primary="Rankings" />
             </ListItem>
-          ))}
-          
+          </Link>
+          <ListItem button>
+              <ListItemIcon><ClassIcon /></ListItemIcon>
+              <ListItemText primary="My Classes(NA)" />
+          </ListItem>
+          <Link to="/dashboard/" >
+            <ListItem button>
+                <ListItemIcon><ColorizeIcon /></ListItemIcon>
+                <ListItemText primary="GPA Mentor (NA)" />
+            </ListItem>
+          </Link>
         </List>
       </Drawer>
       

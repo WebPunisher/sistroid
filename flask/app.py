@@ -255,7 +255,7 @@ def get_ranking():
 @cross_origin()
 def student_info(student_id):
     response = jsonify(get_student_info(student_id))
-    response.headers.add("Access-Control-Allow-Origin", "*")
+    # response.headers.add("Access-Control-Allow-Origin", "*")
     return response    
     
 def get_student_info(student_id):
