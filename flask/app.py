@@ -4,12 +4,13 @@ from flask_mysqldb import MySQL
 import json
 import random
 import histogram
+from datetime import datetime as dt
 
 # from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'passw0rd'
+app.config['MYSQL_PASSWORD'] = 'sarptalha'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
@@ -108,6 +109,16 @@ def create_tables():
     where crn is null;
     '''
     )    
+       
+    cur.execute('''CREATE TABLE IF NOT EXISTS semesters (
+    semester_year INT NOT NULL,
+    semester_season varchar(10) NOT NULL,
+    end_date TIMESTAMP,
+    start_date TIMESTAMP,
+    
+    PRIMARY KEY (semester_year,semester_season));
+    '''
+    )           
     
     mysql.connection.commit()  
     return("success")
@@ -133,6 +144,10 @@ add_to_db_querries = {
     "grade": '''
                 INSERT INTO grades (student_id , grade, crn)
                 VALUES (%s,%s,%s); 
+            ''' ,
+    "semester": '''
+                INSERT INTO semesters (semester_year , semester_season, end_date, start_date)
+                VALUES (%s,%s,%s,%s); 
             ''' ,
 }
 
@@ -194,7 +209,9 @@ def deneme():
     with open('./seeddata.json') as json_file:
         cur = mysql.connection.cursor()
         data = json.load(json_file)
-
+        
+        cur.execute(add_to_db_querries["semester"],(2021,"spring","2021-01-28 20:53:41","2021-07-28 20:53:41"))
+        
         for i in data['people']:
             cur.execute('''  INSERT INTO people (pname,psurname) VALUES (%s,%s); ''',(i.split(" ")[0],i.split(" ")[1]))
         
@@ -254,52 +271,68 @@ def get_ranking():
 @app.route('/student_info/<student_id>',methods = ["GET"])
 @cross_origin()
 def student_info(student_id):
-    response = jsonify(get_student_info(student_id))
-    # response.headers.add("Access-Control-Allow-Origin", "*")
-    return response    
+    if request.method == "GET":
+        response = jsonify(get_student_info(student_id))
+        return response    
     
 def get_student_info(student_id):
-    if request.method == "GET":
-        cur = mysql.connection.cursor()   
-        
-        cur.execute(
-        '''
-        select classes.crn,c_class_name from classes 
-        inner join enrollment on 
-        classes.crn = enrollment.crn
-        inner join topics on
-        classes.c_class_name = topics.class_name
-        inner join students on 
-        students.person_id = enrollment.student_id
-        where students.person_id = %s;
-        ''',(student_id,))
-        
-        classes = cur.fetchall()
-        
-        cur.execute(
-        '''
-        select grades.crn,topics.class_name,grade,topics.credits from students
-        inner join grades on 
-        grades.student_id = students.person_id
-        inner join enrollment on 
-        grades.crn = enrollment.crn and students.person_id = enrollment.student_id
-        inner join classes on 
-        enrollment.crn = classes.crn
-        inner join topics on 
-        topics.class_name = classes.c_class_name
-        where students.person_id = %s;
-        ''',(student_id,))
+    cur = mysql.connection.cursor()   
+    
+    cur.execute(
+    '''
+    select classes.crn,c_class_name from classes 
+    inner join enrollment on 
+    classes.crn = enrollment.crn
+    inner join topics on
+    classes.c_class_name = topics.class_name
+    inner join students on 
+    students.person_id = enrollment.student_id
+    inner join semesters on 
+    (classes.created_at between end_date and start_date) and
+    (current_timestamp() between end_date and start_date)
+    where students.person_id = %s;
+    ''',(student_id,))
+    
+    ongoing_classes = cur.fetchall()
+    
+    cur.execute(
+    '''
+    select classes.crn,c_class_name from classes 
+    inner join enrollment on 
+    classes.crn = enrollment.crn
+    inner join topics on
+    classes.c_class_name = topics.class_name
+    inner join students on 
+    students.person_id = enrollment.student_id
+    where students.person_id = %s;
+    ''',(student_id,))
+    
+    classes = cur.fetchall()
+    
+    cur.execute(
+    '''
+    select grades.crn,topics.class_name,grade,topics.credits from students
+    inner join grades on 
+    grades.student_id = students.person_id
+    inner join enrollment on 
+    grades.crn = enrollment.crn and students.person_id = enrollment.student_id
+    inner join classes on 
+    enrollment.crn = classes.crn
+    inner join topics on 
+    topics.class_name = classes.c_class_name
+    where students.person_id = %s;
+    ''',(student_id,))
 
-        grades = cur.fetchall()
-        
-        cur.execute(
-        '''
-        select pname,psurname from students where person_id = %s
-        ''',(student_id,))       
-        
-        info= cur.fetchone()
-        
-        return {"classes":classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info}
+    grades = cur.fetchall()
+    
+    cur.execute(
+    '''
+    select pname,psurname from students where person_id = %s
+    ''',(student_id,))       
+    
+    info= cur.fetchone()
+    
+    return {"classes":classes,"ongoing_classes":ongoing_classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info}
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
 @cross_origin()
