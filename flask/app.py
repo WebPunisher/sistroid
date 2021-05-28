@@ -244,7 +244,6 @@ def get_ranking():
     GPA_LIST=[]
     for person in people:
         person_name = person["pname"] + " " + person["psurname"]
-        print("person=",person)
         person_gpa = get_student_info(person["person_id"])["GPA"]
         GPA_LIST.append((person_name,person_gpa))
         
