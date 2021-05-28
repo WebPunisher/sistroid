@@ -1,30 +1,44 @@
 import React,{useState,useEffect} from 'react';
-
 import './myclasses.styles.scss';
 import Select from 'react-select'
 import { TextField } from '@material-ui/core';
 import axios from '../../axios';
+import Class from '../class/class.component';
 
 
 const MyClasses = () => {
 
-    const [classes,setClasses] = useState()
+    const [ongoingClasses,setOngoingClasses] = useState()
     const [gradedClasses,setGradedClasses] = useState()
 
     useEffect(()=>{
         axios.get('/student_info/12').then( res =>{
-            setClasses(res.data)
-            // console.log(Object.values(res.data))
-            console.log(res.data)
+            console.log(res.data.ongoing_classes)
+            console.log(res.data.grades)
+            setOngoingClasses(res.data.ongoing_classes)
+            setGradedClasses(res.data.grades)
         })
     },[]) ;
 
+    const contains = crn => {
+        gradedClasses.forEach((el) => {
+            if (crn == el.crn){
+                return false
+            }
+        })
+        return false
+    }
     
     return (
         
         <div className="myclasses">
-            
-             myclasses
+            {ongoingClasses & gradedClasses ?  ongoingClasses.filter((clss) => contains(clss.crn)).map((e)=>{
+                return <Class class_name={e.class_name} credits={e.credits} crn={e.crn}></Class>
+            }): null}
+            { gradedClasses ? gradedClasses.map((e)=>{
+                return <Class class_name={e.class_name} credits={e.credits} crn={e.crn} grade={e.grade}/>
+            }) :  null}
+
         </div>
     )
 }

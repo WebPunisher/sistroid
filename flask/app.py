@@ -280,7 +280,7 @@ def get_student_info(student_id):
     
     cur.execute(
     '''
-    select classes.crn,c_class_name from classes 
+    select classes.crn,c_class_name,topics.credits from classes 
     inner join enrollment on 
     classes.crn = enrollment.crn
     inner join topics on

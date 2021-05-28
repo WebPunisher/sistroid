@@ -22,6 +22,8 @@ import MailIcon from '@material-ui/icons/Mail';
 import Avatar from '@material-ui/core/Avatar';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import ClassIcon from '@material-ui/icons/Class';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+// import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 
 const drawerWidth = 240;
 
@@ -179,14 +181,22 @@ const Drawere = ()  => {
                 <ListItemText primary="Rankings" />
             </ListItem>
           </Link>
-          <ListItem button>
-              <ListItemIcon><ClassIcon /></ListItemIcon>
-              <ListItemText primary="My Classes(NA)" />
-          </ListItem>
-          <Link to="/dashboard/" >
+          <Link to="/dashboard/myclasses" >
+            <ListItem button>
+                <ListItemIcon><ClassIcon /></ListItemIcon>
+                <ListItemText primary="My Classes(NA)" />
+            </ListItem>
+          </Link>
+          <Link to="/dashboard/gpa_mentor" >
             <ListItem button>
                 <ListItemIcon><ColorizeIcon /></ListItemIcon>
                 <ListItemText primary="GPA Mentor (NA)" />
+            </ListItem>
+          </Link>
+          <Link to="/dashboard/add_drop" >
+            <ListItem button>
+                <ListItemIcon><AddCircleIcon/></ListItemIcon>
+                <ListItemText primary="Add / Drop (NA)" />
             </ListItem>
           </Link>
         </List>
