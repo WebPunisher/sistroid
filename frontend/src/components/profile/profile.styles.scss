@@ -1,0 +1,52 @@
+.profilePage{
+
+    margin-top: 50px;
+
+    .boldClass{
+        font-weight: 600;
+    }
+    .profileImage{
+        width:300px;
+        height:300px;
+        object-fit:cover;
+        border-radius:50%;
+        margin-left: 5%;
+    }
+    .generalInfo{
+        margin-left: 5%;
+        display: inline-block;
+        width: 30%;
+    }
+    .contactInfo{
+        display: inline-block;
+        width: 30%;
+    }
+    .infoHeader{
+        font-weight: 500;
+        font-size: 30px;
+    }
+    .profileInput{
+        margin: 20px;
+    }
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    .buttonInMiddle{
+        margin-left: 20px;
+        margin-bottom: -110px;
+    }
+    .editIcon:hover{
+        transform: scale(1.1);
+        background-color: lightgray;
+        transition: 0.2s;
+    }
+}

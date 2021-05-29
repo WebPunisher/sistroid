@@ -20,9 +20,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import Avatar from '@material-ui/core/Avatar';
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import ClassIcon from '@material-ui/icons/Class';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 // import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import EqualizerIcon from '@material-ui/icons/Equalizer';
 
@@ -158,24 +160,17 @@ const Drawere = ()  => {
           </IconButton>
         </div>
         <Divider />
-        <List>
-            <ListItem>
-                <ListItemIcon><Avatar src="/broken-image.jpg" className={classes.avatar} /></ListItemIcon> 
-                <ListItemText primary="Profile" />
-            </ListItem>
-        </List>
-        <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <Link to="/dashboard/d" key={index}>
-              <ListItem button key={index}>
-                <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            </Link>
-          ))}
-        </List>
+        
+
         <Divider />
         <List>
+        
+          <Link to="/dashboard/profile" >
+            <ListItem button>
+                <ListItemIcon><AccountBoxIcon /></ListItemIcon>
+                <ListItemText primary="Profile" />
+            </ListItem>
+          </Link>
           <Link to="/dashboard/ranking" >
             <ListItem button>
                 <ListItemIcon><ColorizeIcon /></ListItemIcon>
@@ -190,7 +185,7 @@ const Drawere = ()  => {
           </Link>
           <Link to="/dashboard/gpa_mentor" >
             <ListItem button>
-                <ListItemIcon><ColorizeIcon /></ListItemIcon>
+                <ListItemIcon><AssignmentTurnedInIcon/></ListItemIcon>
                 <ListItemText primary="GPA Mentor (NA)" />
             </ListItem>
           </Link>
