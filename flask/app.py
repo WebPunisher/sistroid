@@ -340,6 +340,11 @@ def get_student_info(student_id):
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
 @cross_origin()
+def get_crn_info(crn):
+    response= jsonify(crn_info(crn))
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response    
+    
 def crn_info(crn):
     if request.method == "GET":
         cur = mysql.connection.cursor()
@@ -379,10 +384,7 @@ def crn_info(crn):
         ''',(crn,))
 
         students = cur.fetchall()
-                
-        response= jsonify({"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)})
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
+        return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
   
 @app.route('/reset')
 @cross_origin()
