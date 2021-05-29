@@ -20,7 +20,7 @@ const Ranking = () => {
       ]
 
     useEffect(()=>{
-        axios.get('/ranking').then( res =>{
+        axios.get('/ranking/all').then( res =>{
             setRanking(res.data)
             // console.log(Object.values(res.data))
         })

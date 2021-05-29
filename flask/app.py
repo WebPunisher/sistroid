@@ -93,7 +93,7 @@ def create_tables():
     cur.execute(
     '''
     create or replace view teachers AS
-    SELECT distinct people.person_id, people.pname, people.psurname, people.created_at
+    SELECT distinct people.person_id, people.pname, people.psurname, people.mail, people.created_at
     FROM people,classes
     WHERE classes.c_teacher_id = people.person_id;
     ''')
@@ -101,7 +101,7 @@ def create_tables():
     cur.execute(
      '''
     create or replace view students AS
-    SELECT distinct people.person_id, people.pname, people.psurname, people.created_at
+    SELECT distinct people.person_id, people.pname, people.psurname,people.mail, people.major, people.created_at
     FROM 
     people left outer join classes
     on
@@ -126,8 +126,8 @@ def create_tables():
 
 add_to_db_querries = {
     "user": '''
-                INSERT INTO people (pname,psurname)
-                VALUES (%s,%s); 
+                INSERT INTO people (pname,psurname,major,mail)
+                VALUES (%s,%s,%s,%s); 
             ''' ,
     "topic": '''
                 INSERT INTO topics (class_name,class_desc,credits)
@@ -164,7 +164,7 @@ delete_from_db_querries = {
 def add_to_db(entry):
     if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
-        cur.execute(add_to_db_querries[entry],(tuple(request.json.values())))
+        cur.execute(add_to_db_querries[entry],tuple(request.json.values()))
         mysql.connection.commit()
         return "added "+entry
 
@@ -192,11 +192,12 @@ def clear_all_tables():
     cur = mysql.connection.cursor()
     cur.execute( '''
             SET FOREIGN_KEY_CHECKS = 0;
-            truncate people;
-            truncate topics;
-            truncate classes;
-            truncate enrollment;
-            truncate grades;
+            drop table people;
+            drop table topics;
+            drop table classes;
+            drop table enrollment;
+            drop table grades;
+            drop table semesters;
             SET FOREIGN_KEY_CHECKS = 1;
               ''')
     # mysql.connection.commit()
@@ -209,28 +210,30 @@ def deneme():
     with open('./seeddata.json') as json_file:
         cur = mysql.connection.cursor()
         data = json.load(json_file)
+        sample_majors = ["ISE","BLG"]
         
         cur.execute(add_to_db_querries["semester"],(2021,"spring","2021-01-28 20:53:41","2021-07-28 20:53:41"))
         
         for i in data['people']:
-            cur.execute('''  INSERT INTO people (pname,psurname) VALUES (%s,%s); ''',(i.split(" ")[0],i.split(" ")[1]))
+            mail_adress = (i.split(" ")[1]+i.split(" ")[0][:2]+str(dt.now().year%2000)+"@itu.edu.tr").lower()
+            cur.execute(add_to_db_querries["user"],(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,1)], mail_adress))
         
         for i in data['topics']:
-            cur.execute('''INSERT INTO topics (class_name,class_desc,credits) VALUES (%s,%s,%s); ''',(i,"Temporary description",random.randint(2,4)))
+            cur.execute(add_to_db_querries["topic"],(i,"Temporary description",random.randint(2,4)))
         
         for i in range(20):
-            cur.execute(''' INSERT INTO classes (c_class_name,c_teacher_id) VALUES (%s,%s); ''',(data['topics'][i%15],i%9+1))
+            cur.execute(add_to_db_querries["class"],(data['topics'][i%15],i%9+1))
 
         crn_dict = dict()
         for i in range(9,50):
             num = random.randint(1,16)
             crn_dict[i] = [num,(num+1)%15+1,(num+2)%15+1,(num+3)%15+1]
             for j in crn_dict[i]:
-                cur.execute('''INSERT INTO enrollment (student_id , crn)VALUES (%s,%s); ''',(i,j))
+                cur.execute(add_to_db_querries["enrollment"],(i,j))
     
         for enrol in crn_dict:
             for crn_num in crn_dict[enrol]:
-                cur.execute('''INSERT INTO grades (student_id , grade, crn) VALUES (%s,%s,%s);''',(enrol,list(grade_translation.keys())[random.randint(0,7)],crn_num))
+                cur.execute(add_to_db_querries["grade"],(enrol,list(grade_translation.keys())[random.randint(0,7)],crn_num))
 
         mysql.connection.commit()
         return ("success1")
@@ -250,12 +253,13 @@ def get_avg_grade(grades, is_class=False):
     return quality_credits/total_credits
     
     
-@app.route('/ranking',methods = ["GET"])
+@app.route('/ranking/<major>',methods = ["GET"])
 @cross_origin()
-def get_ranking():
+def get_ranking(major):
     cur = mysql.connection.cursor()
-    
-    cur.execute("select * from students")
+
+    if major == "all": cur.execute("select * from students")    
+    else: cur.execute("select * from students where major = %s",tuple([major]))
     
     people = cur.fetchall()
     GPA_LIST=[]
@@ -327,7 +331,7 @@ def get_student_info(student_id):
     
     cur.execute(
     '''
-    select pname,psurname from students where person_id = %s
+    select pname,psurname,mail,major from students where person_id = %s
     ''',(student_id,))       
     
     info= cur.fetchone()
