@@ -2,15 +2,20 @@
     min-height: 500px;
     text-align: center;
     
-    .nameFilter{
-        display: inline-block;
+    .rankingFilters{
+        text-align: center;
+        .nameFilter{
+            display: inline-block;
+        }
+        .major-select{
+            width: 35%;
+            display: inline-block;
+            margin-bottom: -30px !important;
+        }
+        
+        
     }
-    .major-select{
-        width: 35%;
-        margin: auto;
-        display: inline-block;
-    }
-    
+   
     .rank{
         display: inline-block;
         width: 40%;
@@ -18,7 +23,6 @@
         padding: 10px;
         margin: 10px;
     }
-
 }
 
 

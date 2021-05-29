@@ -11,6 +11,7 @@ import Ranking from '../../components/ranking/ranking.component';
 import MyClasses from '../../components/myclasses/myclasses.component';
 import GpaMentor from '../../components/gpamentor/gpamentor.component';
 import AddDrop from '../../components/adddrop/adddrop.component';
+import Histogram from '../../components/histogram/histogram.component';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,6 +47,8 @@ const Dashboard = ()  => {
           <Route path='/dashboard/myclasses'  component={MyClasses}/>
           <Route path='/dashboard/gpa_mentor' component={GpaMentor}/>
           <Route path='/dashboard/add_drop' component={AddDrop}/>
+          <Route path='/dashboard/histogram' component={Histogram}/>
+
         </Switch>
 
         {/* <Typography paragraph>

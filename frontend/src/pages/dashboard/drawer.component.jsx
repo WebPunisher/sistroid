@@ -24,6 +24,7 @@ import ColorizeIcon from '@material-ui/icons/Colorize';
 import ClassIcon from '@material-ui/icons/Class';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 // import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import EqualizerIcon from '@material-ui/icons/Equalizer';
 
 const drawerWidth = 240;
 
@@ -165,8 +166,8 @@ const Drawere = ()  => {
         </List>
         <List>
           {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <Link to="/dashboard/d" >
-              <ListItem button key={text}>
+            <Link to="/dashboard/d" key={index}>
+              <ListItem button key={index}>
                 <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
                 <ListItemText primary={text} />
               </ListItem>
@@ -199,6 +200,13 @@ const Drawere = ()  => {
                 <ListItemText primary="Add / Drop (NA)" />
             </ListItem>
           </Link>
+          <Link to="/dashboard/histogram" >
+            <ListItem button>
+                <ListItemIcon><EqualizerIcon/></ListItemIcon>
+                <ListItemText primary="Histogram" />
+            </ListItem>
+          </Link>
+          
         </List>
       </Drawer>
       

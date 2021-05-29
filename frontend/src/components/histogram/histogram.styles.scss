@@ -1,0 +1,24 @@
+.histogram{
+
+    .searcHistogram{
+        text-align: center;
+
+        .nameFilter{
+            display: inline-block;
+        }
+        .buttonParent{
+            margin: 8px;
+            display: inline-block;
+        }
+        .searchButton{
+            display: inline-block;
+            margin-bottom: -30px;
+        }
+    }
+
+    .histogramImage{
+        margin-top: 70px;
+        margin-left: 10%;
+        width: 600px;
+    }
+}

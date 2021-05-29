@@ -10,30 +10,27 @@ const Ranking = () => {
 
     const [ranking,setRanking] = useState()
     const [nameFilter,setNameFilter] = useState('')
-    const [majorFilter,setMajorFilter] = useState([' '])
-    const colourOptions = [
-        { value: 'chocolate', label: 'Chocolate' },
-        { value: 'strawberry', label: 'Strawberry' },
-        { value: 'vanilla', label: 'Vanilla' },
-        { value: 'Hal Frick', label: 'Hal Frick' },
-        { value: 'kal', label: 'kal' }
+    const [majorFilter,setMajorFilter] = useState([])
+    const majorOptions = [
+        { value: 'ISE', label: 'ISE (Informations Systems Engineering)' },
+        { value: 'BLG', label: 'BLG (Bilgisayar Muhendisligi)' },
+        { value: 'PHY', label: ' Physics' },
+        { value: 'CHE', label: ' Chemistry Engineering' },
       ]
 
-    useEffect(()=>{
-        axios.get('/ranking/all').then( res =>{
-            setRanking(res.data)
-            // console.log(Object.values(res.data))
-        })
-    },[]) ;
+    useEffect(() => {
+        if (majorFilter == ''){
+            axios.get('/ranking/all').then( res =>{
+                setRanking(res.data)
+            })
+        } else {
+            axios.get(`/ranking/${majorFilter}`).then( res =>{
+                setRanking(res.data)
+            })
+        }
+    },[majorFilter])
 
-    const contains = str => {
-        majorFilter.forEach((el) => {
-            if (str.includes(el)){
-                return true
-            }
-        })
-        return false
-    }
+
     const handleChange = (values) => {
         let valueArr=[]
         values.forEach((value)=>{
@@ -45,7 +42,8 @@ const Ranking = () => {
         
         <div className="ranking">
             {nameFilter}
-            <div>
+            {majorFilter}
+            <div className="rankingFilters">
                 <form className="nameFilter" noValidate autoComplete="off">
                     <TextField onChange={ e => setNameFilter(e.target.value)} id="standard-basic" label="Name Filter" />
                 </form>
@@ -55,7 +53,7 @@ const Ranking = () => {
                         isMulti
                         onChange={handleChange}
                         name="colors"
-                        options={colourOptions}
+                        options={majorOptions}
                         className="basic-multi-select"
                         classNamePrefix="select"
                     />
@@ -65,16 +63,10 @@ const Ranking = () => {
             {ranking ?
                 Object.values(ranking).filter( rnk => rnk[0].includes(nameFilter)).map((element)=>{
                     return (
-                        <div className="rank">{element[0]}  &emsp;{element[1].toFixed(3)}</div>
+                        <div key={element[0]} className="rank">{element[0]}  &emsp;{element[1].toFixed(3)}</div>
                     )
             }) : null}
             
-            {/* {ranking ?
-            Object.values(ranking).filter( rnk => contains(rnk[0])).map((element)=>{
-                return (
-                    <div className="rank">{element[0]}  &emsp;{element[1].toFixed(3)}</div>
-                )
-            }) : null} */}
             
             
         </div>
