@@ -24,10 +24,11 @@ def create_tables():
     
     cur.execute('''CREATE TABLE IF NOT EXISTS people (
     person_id INT AUTO_INCREMENT PRIMARY KEY,
-    pname VARCHAR(255) NOT NULL,
-    psurname VARCHAR(255) NOT NULL,
+    pname VARCHAR(50) NOT NULL,
+    psurname VARCHAR(50) NOT NULL,
     mail VARCHAR(255) ,
     major VARCHAR(3) ,
+    photo_url VARCHAR(255) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );''')    
     
@@ -93,7 +94,7 @@ def create_tables():
     cur.execute(
     '''
     create or replace view teachers AS
-    SELECT distinct people.person_id, people.pname, people.psurname, people.mail, people.created_at
+    SELECT distinct people.person_id, people.pname, people.psurname, people.mail, people.created_at, people.photo_url
     FROM people,classes
     WHERE classes.c_teacher_id = people.person_id;
     ''')
@@ -101,7 +102,7 @@ def create_tables():
     cur.execute(
      '''
     create or replace view students AS
-    SELECT distinct people.person_id, people.pname, people.psurname,people.mail, people.major, people.created_at
+    SELECT distinct people.person_id, people.pname, people.psurname,people.mail, people.major, people.created_at, people.photo_url
     FROM 
     people left outer join classes
     on
@@ -126,8 +127,8 @@ def create_tables():
 
 add_to_db_querries = {
     "user": '''
-                INSERT INTO people (pname,psurname,major,mail)
-                VALUES (%s,%s,%s,%s); 
+                INSERT INTO people (pname,psurname,major,mail,photo_url)
+                VALUES (%s,%s,%s,%s,%s); 
             ''' ,
     "topic": '''
                 INSERT INTO topics (class_name,class_desc,credits)
@@ -216,7 +217,7 @@ def deneme():
         
         for i in data['people']:
             mail_adress = (i.split(" ")[1]+i.split(" ")[0][:2]+str(dt.now().year%2000)+"@itu.edu.tr").lower()
-            cur.execute(add_to_db_querries["user"],(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,1)], mail_adress))
+            cur.execute(add_to_db_querries["user"],(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,1)], mail_adress, "https://thispersondoesnotexist.com/image"))
         
         for i in data['topics']:
             cur.execute(add_to_db_querries["topic"],(i,"Temporary description",random.randint(2,4)))
@@ -331,7 +332,7 @@ def get_student_info(student_id):
     
     cur.execute(
     '''
-    select pname,psurname,mail,major from students where person_id = %s
+    select pname,psurname,mail,major,photo_url from students where person_id = %s
     ''',(student_id,))       
     
     info= cur.fetchone()
