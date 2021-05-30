@@ -393,6 +393,8 @@ def grade_search(quality_c, avaliable_c, classes, class_index = 0):
         return classes,quality_c
     if class_index >= len(classes) or avaliable_c <= 0:
         return None,0
+    if avaliable_c < classes[class_index]["credits"]:
+        return grade_search(quality_c, avaliable_c,classes,class_index+1) #search next one
     
     for grade in list(grade_translation.keys())[::-1]:
         if grade >= classes[class_index]["grade"]: continue #if not greater than original continue
