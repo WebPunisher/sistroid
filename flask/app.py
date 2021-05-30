@@ -9,6 +9,7 @@ from datetime import datetime as dt
 import flask_praetorian
 from hashlib import sha256
 from crypto import Random
+import sys
 
 # from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
@@ -190,13 +191,25 @@ def register():
     response = jsonify({"token":session_key,"id":id_num})    
     return response
     
-def authenticate(req):
-    try:
-        number = req.json["id"]
-        token = req.json["token"]
-        return sessions[number] == token
-    except:
-        return False
+def authenticate(req,subject_id = "super"):
+    #try:
+    number = req.json["id"]
+    token = req.json["token"]
+
+    cur = mysql.connection.cursor()
+    cur.execute("select * from students where person_id = %s",(number,))
+    
+    user = cur.fetchone()
+    print(number, subject_id, number == subject_id ,sessions[number] == token, file=sys.stderr)
+    if user:
+        return subject_id != "super" and int(number) == int(subject_id) and sessions[number] == token
+    else:
+        cur.execute("select * from teachers where person_id = %s",(number,))
+        user = cur.fetchone()
+        return user and sessions[number] == token
+        
+    #except:
+        #return False
 
 @app.route('/login', methods = ["POST"])
 @cross_origin()
@@ -220,15 +233,17 @@ def login():
 @app.route('/add_<entry>',methods = ["POST"])
 @cross_origin()
 def add_to_db(entry):
+    if not authenticate(request): abort(403)
     if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
-        cur.execute(add_to_db_querries[entry],tuple(request.json.values()))
+        cur.execute(add_to_db_querries[entry],tuple(request.json.values()[2:]))
         mysql.connection.commit()
         return "added "+entry
 
 @app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
 @cross_origin()
 def remove_from_db(entry,id_num):
+    if not authenticate(request): abort(403)
     if request.method == "DELETE" and entry in ["user","topic","class"]:
         cur = mysql.connection.cursor()
         cur.execute(delete_from_db_querries[entry],(id_num))
@@ -238,6 +253,7 @@ def remove_from_db(entry,id_num):
 @app.route('/student_remove_<entry>/<id_num>/<crn>',methods = ["DELETE"])
 @cross_origin()
 def remove_from_db_two_args(entry,id_num,crn):
+    if not authenticate(request): abort(403)
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
         cur.execute(delete_from_db_querries[entry],(id_num,crn))
@@ -274,7 +290,10 @@ def deneme():
         
         for i in data['people']:
             mail_adress = (i.split(" ")[1]+i.split(" ")[0][:2]+str(dt.now().year%2000)+"@itu.edu.tr").lower()
-            cur.execute(add_to_db_querries["user"],(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,1)], mail_adress, "https://thispersondoesnotexist.com/image"))
+            cur.execute('''
+                INSERT INTO people (pname,psurname,major,mail,photo_url,password)
+                VALUES (%s,%s,%s,%s,%s,'5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'); 
+            ''',(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,1)], mail_adress, "https://thispersondoesnotexist.com/image"))
         
         for i in data['topics']:
             cur.execute(add_to_db_querries["topic"],(i,"Temporary description",random.randint(2,4)))
@@ -333,7 +352,7 @@ def get_ranking(major):
 @app.route('/student_info/<student_id>',methods = ["GET"])
 @cross_origin()
 def student_info(student_id):
-    if not authenticate(request): abort(403)
+    if not authenticate(request,student_id): abort(403)
     
     if request.method == "GET":
         response = jsonify(get_student_info(student_id))
@@ -474,6 +493,8 @@ def grade_search(quality_c, avaliable_c, classes, class_index = 0):
 @app.route('/mentor/<student_num>/<avaliable_credits>/<desired_gpa>')
 @cross_origin()
 def gpa_mentor(student_num,avaliable_credits,desired_gpa):
+    if not authenticate(request,student_num): abort(403)
+    
     avaliable_credits = int(avaliable_credits)
     desired_gpa = float(desired_gpa)
     
