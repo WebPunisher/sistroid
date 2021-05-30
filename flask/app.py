@@ -1,4 +1,4 @@
-from flask import Flask,request,jsonify
+from flask import Flask,request,jsonify,abort
 from flask_cors import cross_origin
 from flask_mysqldb import MySQL
 import json
@@ -6,6 +6,9 @@ import random
 import histogram
 from copy import deepcopy
 from datetime import datetime as dt
+import flask_praetorian
+from hashlib import sha256
+from crypto import Random
 
 # from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
@@ -17,6 +20,7 @@ app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
+sessions = {}
 
 @app.route("/create_tables")
 @cross_origin()
@@ -30,6 +34,7 @@ def create_tables():
     mail VARCHAR(255) ,
     major VARCHAR(3) ,
     photo_url VARCHAR(255) ,
+    password VARCHAR(64) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );''')    
     
@@ -161,6 +166,57 @@ delete_from_db_querries = {
     "enrollment" : "DELETE FROM enrollment WHERE student_id = %s and crn = %s",
     }
 
+@app.route('/register', methods = ["POST"])
+@cross_origin()
+def register():
+    cur = mysql.connection.cursor()
+    
+    password = sha256(request.json["password"].encode()).hexdigest()
+    name = request.json["name"]
+    surname = request.json["surname"]
+    mail = request.json["mail"]
+    photo_url = request.json["photo_url"]
+    major = request.json["major"]
+    
+    cur.execute(add_to_db_querries["user"],(name,surname,major,mail,photo_url))
+    cur.execute("update people set password = %s where person_id = (SELECT LAST_INSERT_ID());", (password,))
+    cur.execute("SELECT LAST_INSERT_ID() as id;")
+    
+    session_key = str(Random.get_random_bytes(32))
+    id_num = cur.fetchone()["id"]
+    sessions[id_num] = session_key
+    mysql.connection.commit()  
+    
+    response = jsonify({"token":session_key,"id":id_num})    
+    return response
+    
+def authenticate(req):
+    try:
+        number = req.json["id"]
+        token = req.json["token"]
+        return sessions[number] == token
+    except:
+        return False
+
+@app.route('/login', methods = ["POST"])
+@cross_origin()
+def login():
+    cur = mysql.connection.cursor()
+    number = int(request.json["number"])
+    password = request.json["password"]
+    
+    cur.execute("select password from people where person_id = %s",(number,))
+    true_password = cur.fetchone()["password"]
+    
+    if (sha256(password.encode()).hexdigest() == true_password):
+        session_key = str(Random.get_random_bytes(32))
+        sessions[number] = session_key
+        response = jsonify({"token":session_key,"correct":True})
+    else:
+        response = jsonify({"token":"no password","correct":False})
+    return response
+    
+
 @app.route('/add_<entry>',methods = ["POST"])
 @cross_origin()
 def add_to_db(entry):
@@ -277,6 +333,8 @@ def get_ranking(major):
 @app.route('/student_info/<student_id>',methods = ["GET"])
 @cross_origin()
 def student_info(student_id):
+    if not authenticate(request): abort(403)
+    
     if request.method == "GET":
         response = jsonify(get_student_info(student_id))
         return response    
@@ -388,6 +446,7 @@ def crn_info(crn):
         students = cur.fetchall()
         return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
   
+
 def grade_search(quality_c, avaliable_c, classes, class_index = 0):
     if quality_c <= 0:
         return classes,quality_c
@@ -429,7 +488,7 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
     required_quality_credits = desired_quality_credits - quality_credits
     
     #check improveable classes
-    improveable = [grade for grade in student_data["grades"] if grade["grade"] > "CC"]
+    improveable = [grade for grade in student_data["grades"] if grade["grade"] > "CB"]
     improveable.sort(key = lambda x: x["grade"], reverse=True)
     improveable = improveable[:4] #take 4 lowest grades below CC
     
