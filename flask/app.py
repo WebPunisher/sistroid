@@ -4,13 +4,14 @@ from flask_mysqldb import MySQL
 import json
 import random
 import histogram
+from copy import deepcopy
 from datetime import datetime as dt
 
 # from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'passw0rd'
+app.config['MYSQL_PASSWORD'] = 'sarptalha'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
@@ -386,6 +387,73 @@ def crn_info(crn):
 
         students = cur.fetchall()
         return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
+  
+def grade_search(quality_c, avaliable_c, classes, class_index = 0):
+    if quality_c <= 0:
+        return classes,quality_c
+    if class_index >= len(classes) or avaliable_c <= 0:
+        return None,0
+    
+    for grade in list(grade_translation.keys())[::-1]:
+        if grade >= classes[class_index]["grade"]: continue #if not greater than original continue
+        
+        
+        old_grade = classes[class_index]["grade"]
+        classes[class_index]["grade"] = grade
+        quality_gain = (grade_translation[grade]-grade_translation[old_grade]) * classes[class_index]["credits"] * 0.25
+        
+        result,q_c = grade_search(quality_c-quality_gain, avaliable_c-classes[class_index]["credits"],classes,class_index+1)
+        if result:
+            return result,q_c
+        
+        classes[class_index]["grade"] = old_grade
+        
+    return None,0
+  
+@app.route('/mentor/<student_num>/<avaliable_credits>/<desired_gpa>')
+@cross_origin()
+def gpa_mentor(student_num,avaliable_credits,desired_gpa):
+    avaliable_credits = int(avaliable_credits)
+    desired_gpa = float(desired_gpa)
+    
+    #data procurement
+    student_data = get_student_info(student_num)
+    credits = [grade["credits"] for grade in student_data["grades"]]
+    total_credits = sum(credits)
+    
+    #required quality credit calculation
+    quality_credits = total_credits * student_data["GPA"] * 0.25
+    desired_quality_credits = total_credits * desired_gpa * 0.25
+    required_quality_credits = desired_quality_credits - quality_credits
+    
+    #check improveable classes
+    improveable = [grade for grade in student_data["grades"] if grade["grade"] > "CC"]
+    improveable.sort(key = lambda x: x["grade"], reverse=True)
+    improveable = improveable[:4] #take 4 lowest grades below CC
+    
+    new_grades,q_c = grade_search(required_quality_credits,avaliable_credits,deepcopy(improveable))
+    
+    if new_grades:
+        changed_grades = []
+        for grade in new_grades:
+            if not grade in student_data["grades"]:
+                changed_grades.append(grade)
+        
+        response = {"old_grades" : student_data["grades"],
+                    "new_grades" : changed_grades,
+                    "old_gpa" : student_data["GPA"],
+                    "new_gpa" : ((quality_credits+required_quality_credits-q_c)/total_credits)*4,
+                    "required quality credits" : required_quality_credits}
+    else:
+        response = {"old_grades" : student_data["grades"],
+                    "new_grades" : "Not reachable ):",
+                    "old_gpa" : student_data["GPA"],
+                    "new_gpa" : "4.0 (in your dreams)",
+                    "required quality credits" : "infinite lmao"}        
+    
+    response= jsonify(response)
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
   
 @app.route('/reset')
 @cross_origin()
