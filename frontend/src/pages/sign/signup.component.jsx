@@ -1,4 +1,5 @@
-import React from "react";
+import React,{useState,useEffect} from "react";
+import axios from '../../axios';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faEnvelope, faUnlockAlt } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
@@ -9,6 +10,45 @@ import BgImage from "../../assets/img/illustrations/signin.svg";
 
 
 const SignUp = () => {
+
+  const [mail,setMail]= useState()
+  const [name,setName] = useState()
+  const [surname,setSurname] = useState()
+  const [password,setPassword] = useState()
+  const [checkPass,setCheckPass] = useState()
+  const [major,setMajor] = useState('ISE')
+  const [photoURL,setPhotoURL] = useState("no")
+
+  const checkValidity = () => {
+    if(name === "" || surname === "" || password==="" || password==="" ){
+      alert("At least one of the inputs is empty")
+      return false
+    } else if (password != checkPass){
+      alert("password != checkPassword")
+      return false
+    } else {
+      return true
+    }
+  }
+
+  const register = () => {
+    if(checkValidity()){
+      axios.post('/register', {
+        name: name,
+        surname: surname,
+        password: password,
+        photo_url: photoURL,
+        major: major,
+        mail: mail
+      })
+      .then((response) => {
+        console.log(response);
+      }, (error) => {
+        console.log(error);
+      });
+    }
+  }
+
   return (
     <main>
       <section className="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
@@ -31,16 +71,30 @@ const SignUp = () => {
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faEnvelope} />
                       </InputGroup.Text>
-                      <Form.Control autoFocus required type="email" placeholder="example@company.com" />
+                      <Form.Control onChange={(e) => setMail(e.target.value)} autoFocus required type="email" placeholder="example@company.com" />
                     </InputGroup>
                   </Form.Group>
+                  <Form.Group id="name" className="mb-4">
+                    <Form.Label>Your Name</Form.Label>
+                    <InputGroup>
+                      <Form.Control onChange={(e) => setName(e.target.value)} autoFocus required type="name" placeholder="Name" />
+                    </InputGroup>
+                  </Form.Group>
+                  <Form.Group id="name" className="mb-4">
+                    <Form.Label>Your Surname</Form.Label>
+                    <InputGroup>
+                      <Form.Control onChange={(e) => setSurname(e.target.value)} autoFocus required type="name" placeholder="Surname" />
+                    </InputGroup>
+                  </Form.Group>
+                  
+                  
                   <Form.Group id="password" className="mb-4">
                     <Form.Label>Your Password</Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faUnlockAlt} />
                       </InputGroup.Text>
-                      <Form.Control required type="password" placeholder="Password" />
+                      <Form.Control onChange={(e) => setPassword(e.target.value)} required type="password" placeholder="Password" />
                     </InputGroup>
                   </Form.Group>
                   <Form.Group id="confirmPassword" className="mb-4">
@@ -49,7 +103,7 @@ const SignUp = () => {
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faUnlockAlt} />
                       </InputGroup.Text>
-                      <Form.Control required type="password" placeholder="Confirm Password" />
+                      <Form.Control onChange={(e) => setCheckPass(e.target.value)} required type="password" placeholder="Confirm Password" />
                     </InputGroup>
                   </Form.Group>
                   <FormCheck type="checkbox" className="d-flex mb-4">
@@ -59,7 +113,7 @@ const SignUp = () => {
                     </FormCheck.Label>
                   </FormCheck>
 
-                  <Button variant="primary" type="submit" className="w-100">
+                  <Button variant="primary" type="submit" className="w-100" onClick={()=>register()}>
                     Sign up
                   </Button>
                 </Form>
