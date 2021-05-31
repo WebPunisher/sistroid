@@ -1,8 +1,18 @@
-import React from "react";
+import React,{useState,useEffect} from "react";
 import './gpamentor.styles.scss';
+
+import axios from '../../axios';
 
 
 const GpaMentor = props => {
+  useEffect(() => {
+    axios.get('/student_info/14',{data:{id:14,token:sessionStorage.getItem('token')}})
+    .then((response) => {
+      console.log(response.data);
+    }, (error) => {
+      console.log(error);
+    });
+},[])
   return (
     <div className="gpamentor">
         WELCOME TO THE GPA MENTOR

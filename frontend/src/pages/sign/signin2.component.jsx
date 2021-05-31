@@ -1,4 +1,5 @@
-import React from "react";
+import React,{useState} from "react";
+import axios from '../../axios.js';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faEnvelope, faUnlockAlt } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
@@ -9,6 +10,36 @@ import BgImage from "../../assets/img/illustrations/signin.svg";
 
 
 const SignIn= () => {
+
+  const [studentNumber,setStudentNumber] = useState()
+  const [password,setPassword] = useState()
+
+  const checkValidity = () => {
+    if(studentNumber === "" || password==="" ){
+      alert("At least one of the inputs is empty")
+      return false
+    }  else {
+      return true
+    }
+  }
+
+  const login = () => {
+    console.log("sending name"+studentNumber)
+    if(checkValidity()){
+      axios.post('/login', {
+        number: Number(studentNumber),
+        password: password,
+      })
+      .then((response) => {
+        console.log(response);
+        sessionStorage.setItem('token', response.data.token)
+        console.log(sessionStorage.getItem('token'))
+      }, (error) => {
+        console.log(error);
+      });
+    }
+  }
+
   return (
     <main>
       <section className="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
@@ -26,12 +57,12 @@ const SignIn= () => {
                 </div>
                 <Form className="mt-4">
                   <Form.Group id="email" className="mb-4">
-                    <Form.Label>Your Email</Form.Label>
+                    <Form.Label>Student Number</Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faEnvelope} />
                       </InputGroup.Text>
-                      <Form.Control autoFocus required type="email" placeholder="example@company.com" />
+                      <Form.Control onChange={(e) => setStudentNumber(e.target.value)} autoFocus required  placeholder=" Student Number" />
                     </InputGroup>
                   </Form.Group>
                   <Form.Group>
@@ -41,7 +72,7 @@ const SignIn= () => {
                         <InputGroup.Text>
                           <FontAwesomeIcon icon={faUnlockAlt} />
                         </InputGroup.Text>
-                        <Form.Control required type="password" placeholder="Password" />
+                        <Form.Control onChange={(e) => setPassword(e.target.value)} required type="password" placeholder="Password" />
                       </InputGroup>
                     </Form.Group>
                     <div className="d-flex justify-content-between align-items-center mb-4">
@@ -52,7 +83,7 @@ const SignIn= () => {
                       <Card.Link className="small text-end">Lost password?</Card.Link>
                     </div>
                   </Form.Group>
-                  <Button variant="primary" type="submit" className="w-100">
+                  <Button onClick={()=>login()} variant="primary" className="w-100">
                     Sign in
                   </Button>
                 </Form>

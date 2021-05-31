@@ -113,7 +113,7 @@ const SignUp = () => {
                     </FormCheck.Label>
                   </FormCheck>
 
-                  <Button variant="primary" type="submit" className="w-100" onClick={()=>register()}>
+                  <Button variant="primary"  className="w-100" onClick={()=>register()}>
                     Sign up
                   </Button>
                 </Form>
