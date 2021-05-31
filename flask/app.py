@@ -196,24 +196,25 @@ def register():
     return response
     
 def authenticate(req,subject_id = "super"):
-    try:
-        number = req.json["id"]
-        token = req.json["token"]
+    print(req.headers["Id"],req.headers["Token"], file=sys.stderr)
+    #try:
+    number = int(req.headers["Id"])
+    token = req.headers["Token"]
+
+    cur = mysql.connection.cursor()
+    cur.execute("select * from students where person_id = %s",(number,))
     
-        cur = mysql.connection.cursor()
-        cur.execute("select * from students where person_id = %s",(number,))
-        
+    user = cur.fetchone()
+    print(number, subject_id, number == int(subject_id) ,sessions[number] == token,'\n',sessions[number] , token, file=sys.stderr)
+    if user:
+        return subject_id != "super" and number == int(subject_id) and sessions[number] == token
+    else:
+        cur.execute("select * from teachers where person_id = %s",(number,))
         user = cur.fetchone()
-        print(number, subject_id, number == subject_id ,sessions[number] == token, file=sys.stderr)
-        if user:
-            return subject_id != "super" and int(number) == int(subject_id) and sessions[number] == token
-        else:
-            cur.execute("select * from teachers where person_id = %s",(number,))
-            user = cur.fetchone()
-            return user and sessions[number] == token
+        return user and sessions[number] == token
         
-    except:
-        return False
+    #except:
+        #return False
 
 @app.route('/login', methods = ["POST"])
 @cross_origin()
@@ -226,7 +227,7 @@ def login():
     true_password = cur.fetchone()["password"]
     
     if (sha256(password.encode()).hexdigest() == true_password):
-        session_key = str(get_random_bytes(32))
+        session_key = get_random_bytes(32).hex()
         sessions[number] = session_key
         response = jsonify({"token":session_key,"correct":True})
     else:
@@ -240,7 +241,7 @@ def add_to_db(entry):
     if not authenticate(request): abort(403)
     if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
-        cur.execute(add_to_db_querries[entry],tuple(request.json.values()[2:]))
+        cur.execute(add_to_db_querries[entry],tuple(request.json.values()))
         mysql.connection.commit()
         return "added "+entry
 
