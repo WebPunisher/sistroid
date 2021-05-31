@@ -6,9 +6,9 @@ import random
 import histogram
 from copy import deepcopy
 from datetime import datetime as dt
-import flask_praetorian
 from hashlib import sha256
-from crypto import Random
+# from crypto import Random
+from Crypto.Random import get_random_bytes
 import sys
 
 # from flask_httpauth import HTTPBasicAuth
@@ -183,7 +183,7 @@ def register():
     cur.execute("update people set password = %s where person_id = (SELECT LAST_INSERT_ID());", (password,))
     cur.execute("SELECT LAST_INSERT_ID() as id;")
     
-    session_key = str(Random.get_random_bytes(32))
+    session_key = str(get_random_bytes(32))
     id_num = cur.fetchone()["id"]
     sessions[id_num] = session_key
     mysql.connection.commit()  
@@ -222,7 +222,7 @@ def login():
     true_password = cur.fetchone()["password"]
     
     if (sha256(password.encode()).hexdigest() == true_password):
-        session_key = str(Random.get_random_bytes(32))
+        session_key = str(get_random_bytes(32))
         sessions[number] = session_key
         response = jsonify({"token":session_key,"correct":True})
     else:
