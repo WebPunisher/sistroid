@@ -8,14 +8,18 @@ from copy import deepcopy
 from datetime import datetime as dt
 from hashlib import sha256
 # from crypto import Random
-from Crypto.Random import get_random_bytes
+try:
+    from Crypto.Random import get_random_bytes
+except:
+    from crypto import Random
+    get_random_bytes = Random.get_random_bytes
 import sys
 
 # from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'passw0rd'
+app.config['MYSQL_PASSWORD'] = 'sarptalha'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
@@ -192,24 +196,24 @@ def register():
     return response
     
 def authenticate(req,subject_id = "super"):
-    #try:
-    number = req.json["id"]
-    token = req.json["token"]
-
-    cur = mysql.connection.cursor()
-    cur.execute("select * from students where person_id = %s",(number,))
+    try:
+        number = req.json["id"]
+        token = req.json["token"]
     
-    user = cur.fetchone()
-    print(number, subject_id, number == subject_id ,sessions[number] == token, file=sys.stderr)
-    if user:
-        return subject_id != "super" and int(number) == int(subject_id) and sessions[number] == token
-    else:
-        cur.execute("select * from teachers where person_id = %s",(number,))
-        user = cur.fetchone()
-        return user and sessions[number] == token
+        cur = mysql.connection.cursor()
+        cur.execute("select * from students where person_id = %s",(number,))
         
-    #except:
-        #return False
+        user = cur.fetchone()
+        print(number, subject_id, number == subject_id ,sessions[number] == token, file=sys.stderr)
+        if user:
+            return subject_id != "super" and int(number) == int(subject_id) and sessions[number] == token
+        else:
+            cur.execute("select * from teachers where person_id = %s",(number,))
+            user = cur.fetchone()
+            return user and sessions[number] == token
+        
+    except:
+        return False
 
 @app.route('/login', methods = ["POST"])
 @cross_origin()
