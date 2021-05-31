@@ -196,25 +196,24 @@ def register():
     return response
     
 def authenticate(req,subject_id = "super"):
-    print(req.headers["Id"],req.headers["Token"], file=sys.stderr)
-    #try:
-    number = int(req.headers["Id"])
-    token = req.headers["Token"]
-
-    cur = mysql.connection.cursor()
-    cur.execute("select * from students where person_id = %s",(number,))
+    try:
+        number = int(req.headers["Id"])
+        token = req.headers["Token"]
     
-    user = cur.fetchone()
-    print(number, subject_id, number == int(subject_id) ,sessions[number] == token,'\n',sessions[number] , token, file=sys.stderr)
-    if user:
-        return subject_id != "super" and number == int(subject_id) and sessions[number] == token
-    else:
-        cur.execute("select * from teachers where person_id = %s",(number,))
-        user = cur.fetchone()
-        return user and sessions[number] == token
+        cur = mysql.connection.cursor()
+        cur.execute("select * from students where person_id = %s",(number,))
         
-    #except:
-        #return False
+        user = cur.fetchone()
+        print(number, subject_id, number == int(subject_id) ,sessions[number] == token,'\n',sessions[number] , token, file=sys.stderr)
+        if user:
+            return subject_id != "super" and number == int(subject_id) and sessions[number] == token
+        else:
+            cur.execute("select * from teachers where person_id = %s",(number,))
+            user = cur.fetchone()
+            return user and sessions[number] == token
+        
+    except:
+        return False
 
 @app.route('/login', methods = ["POST"])
 @cross_origin()
