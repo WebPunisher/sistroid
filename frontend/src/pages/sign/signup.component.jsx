@@ -20,17 +20,17 @@ const SignUp = () => {
   const [photoURL,setPhotoURL] = useState("no")
 
   const checkValidity = () => {
-    if(name === "" || surname === "" || password==="" || password==="" ){
+    if(name === "" || surname === "" || password==="" || checkPass==="" ){
       alert("At least one of the inputs is empty")
       return false
     } else if (password != checkPass){
-      alert("password != checkPassword")
+      alert("password is not equal to checkPassword")
       return false
     } else {
       return true
     }
   }
-
+  const sleep = m => new Promise(r => setTimeout(r, m))
   const register = () => {
     if(checkValidity()){
       axios.post('/register', {
@@ -41,7 +41,7 @@ const SignUp = () => {
         major: major,
         mail: mail
       })
-      .then((response) => {
+      .then( async (response) => {
         console.log(response);
       }, (error) => {
         console.log(error);
