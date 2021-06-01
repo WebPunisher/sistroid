@@ -12,7 +12,8 @@ const MyClasses = () => {
     const [gradedClasses,setGradedClasses] = useState()
 
     useEffect(()=>{
-        axios.get('/student_info/12').then( res =>{
+        axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}})
+        .then( res =>{
             console.log(res.data.ongoing_classes)
             console.log(res.data.grades)
             setOngoingClasses(res.data.ongoing_classes)

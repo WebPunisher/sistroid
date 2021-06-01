@@ -419,7 +419,7 @@ def get_student_info(student_id):
     
     info= cur.fetchone()
     
-    return {"classes":classes,"ongoing_classes":ongoing_classes,"grades":grades,"GPA":get_avg_grade(grades),"personal information":info}
+    return {"classes":classes,"ongoing_classes":ongoing_classes,"grades":grades,"GPA":get_avg_grade(grades),"personal_information":info}
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
 @cross_origin()

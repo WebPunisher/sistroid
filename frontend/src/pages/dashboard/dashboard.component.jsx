@@ -53,9 +53,8 @@ const Dashboard = ()  => {
 
         </Switch>
 
-      <button onClick={()=>sessionStorage.setItem('token', 16)}>setter</button>
-      <button onClick={()=>alert(sessionStorage.getItem('token'))}>getter</button>
-      {sessionStorage.getItem('token') ? <div>oke</div> : <div>notoke</div>}
+      <button onClick={()=>alert(sessionStorage.getItem('token'))}>tokengetter</button>
+      <button onClick={()=>alert(sessionStorage.getItem('id'))}>idgetter</button>
         {/* <Typography paragraph>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
           ut labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent elementum

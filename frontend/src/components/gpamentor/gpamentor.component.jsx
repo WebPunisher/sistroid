@@ -6,7 +6,7 @@ import axios from '../../axios';
 
 const GpaMentor = props => {
   useEffect(() => {
-    axios.get('/student_info/14',{data:{id:14,token:sessionStorage.getItem('token')}})
+    axios.get('/student_info/14',{headers:{id:14,token:sessionStorage.getItem('token')}})
     .then((response) => {
       console.log(response.data);
     }, (error) => {

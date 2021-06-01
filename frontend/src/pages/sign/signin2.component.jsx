@@ -1,18 +1,21 @@
 import React,{useState} from "react";
+import { useHistory } from "react-router-dom";
 import axios from '../../axios.js';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faEnvelope, faUnlockAlt } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
 import { Col, Row, Form, Card, Button, FormCheck, Container, InputGroup } from '@themesberg/react-bootstrap';
 import { Link } from 'react-router-dom';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
 import BgImage from "../../assets/img/illustrations/signin.svg";
 
 
 const SignIn= () => {
 
+  const history = useHistory();
   const [studentNumber,setStudentNumber] = useState()
   const [password,setPassword] = useState()
+  const [waiting,setWaiting] = useState(false)
 
   const checkValidity = () => {
     if(studentNumber === "" || password==="" ){
@@ -22,18 +25,24 @@ const SignIn= () => {
       return true
     }
   }
-
-  const login = () => {
+  const sleep = m => new Promise(r => setTimeout(r, m))
+  const login = props  => {
     console.log("sending name"+studentNumber)
     if(checkValidity()){
       axios.post('/login', {
         number: Number(studentNumber),
         password: password,
       })
-      .then((response) => {
-        console.log(response);
-        sessionStorage.setItem('token', response.data.token)
-        console.log(sessionStorage.getItem('token'))
+      .then( async (response) => {
+        if(response.data.correct == true){
+          console.log(response);
+          console.log('Successfully Login');
+          sessionStorage.setItem('token', response.data.token)
+          sessionStorage.setItem('id', studentNumber)
+          setWaiting(true)
+          await sleep(500)
+          history.push("/dashboard");
+        }
       }, (error) => {
         console.log(error);
       });
@@ -42,6 +51,7 @@ const SignIn= () => {
 
   return (
     <main>
+        
       <section className="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
         <Container>
           <p className="text-center">
@@ -51,6 +61,7 @@ const SignIn= () => {
           </p>
           <Row className="justify-content-center form-bg-image" style={{ backgroundImage: `url(${BgImage})` }}>
             <Col xs={12} className="d-flex align-items-center justify-content-center">
+              { !waiting ? 
               <div className="bg-white shadow-soft border rounded border-light p-4 p-lg-5 w-100 fmxw-500">
                 <div className="text-center text-md-center mb-4 mt-md-0">
                   <h3 className="mb-0">Sign in to our platform</h3>
@@ -110,11 +121,11 @@ const SignIn= () => {
                     </Card.Link>
                   </span>
                 </div>
-              </div>
+              </div> :<CircularProgress /> }
             </Col>
           </Row>
         </Container>
-      </section>
+      </section>  
     </main>
   );
 };
