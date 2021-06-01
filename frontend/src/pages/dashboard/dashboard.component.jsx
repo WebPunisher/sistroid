@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     flexGrow: 1,
+    minHeight: 300,
     padding: theme.spacing(3),
   },
 }));
@@ -53,8 +54,6 @@ const Dashboard = ()  => {
 
         </Switch>
 
-      <button onClick={()=>alert(sessionStorage.getItem('token'))}>tokengetter</button>
-      <button onClick={()=>alert(sessionStorage.getItem('id'))}>idgetter</button>
         {/* <Typography paragraph>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
           ut labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent elementum

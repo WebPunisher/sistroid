@@ -11,7 +11,6 @@ const Profile = props => {
   const [gpa,setGpa] = useState()
   const [info,setInfo] = useState()
   const [email,setEmail] = useState('')
-  const [secMail,setSecMail] = useState('')
   const [phone,setPhone] = useState('')
   const [editingContact,setEditingContact] = useState(false)
 
@@ -61,12 +60,10 @@ const Profile = props => {
                 </div> 
               }
             
-              {/* <form className="profileInput" noValidate autoComplete="off">
-                  <TextField onChange={ e => setSecMail(e.target.value)}  id="filled-basic" variant="filled" label="Secondary Email" />
-                  {secMail}
-              </form> */}
           </div>
         </div> : null}
+        <button onClick={()=>alert(sessionStorage.getItem('token'))}>tokengetter</button>
+        <button onClick={()=>alert(sessionStorage.getItem('id'))}>idgetter</button>
     </div> 
   );
 };
