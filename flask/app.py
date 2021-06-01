@@ -242,7 +242,7 @@ def add_to_db(entry):
         cur = mysql.connection.cursor()
         cur.execute(add_to_db_querries[entry],tuple(request.json.values()))
         mysql.connection.commit()
-        return "added "+entry
+        return "added entry"
 
 @app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
 @cross_origin()
