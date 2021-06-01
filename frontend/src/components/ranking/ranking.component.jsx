@@ -19,7 +19,7 @@ const Ranking = () => {
       ]
 
     useEffect(() => {
-        if (majorFilter == ''){
+        if (!majorFilter || majorFilter.length === 0 ){
             axios.get('/ranking/all').then( res =>{
                 setRanking(res.data)
             })
@@ -44,7 +44,7 @@ const Ranking = () => {
             {nameFilter}
             {majorFilter}
             <div className="rankingFilters">
-                <form className="nameFilter" noValidate autoComplete="off">
+                <form  noValidate autoComplete="off">
                     <TextField onChange={ e => setNameFilter(e.target.value)} id="standard-basic" label="Name Filter" />
                 </form>
                 <div className="major-select">

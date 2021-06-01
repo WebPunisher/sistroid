@@ -20,7 +20,6 @@ const SignIn= () => {
   useEffect(() => {
     const listener = event => {
       if (event.code === "Enter" || event.code === "NumpadEnter") {
-        // console.log("Enter key was pressed. Run your function.");
         event.preventDefault();
         login()
       }
@@ -49,7 +48,7 @@ const SignIn= () => {
         password: password,
       })
       .then( async (response) => {
-        if(response.data.correct == true){
+        if(response.data.correct === true){
           console.log(response);
           console.log('Successfully Login');
           sessionStorage.setItem('token', response.data.token)
@@ -67,7 +66,6 @@ const SignIn= () => {
   
   return (
     <main>
-        {studentNumber}{password}
       <section className="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
         <Container>
           <p className="text-center">

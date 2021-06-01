@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from "react";
+import React,{useState} from "react";
 import axios from '../../axios';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faEnvelope, faUnlockAlt } from "@fortawesome/free-solid-svg-icons";
@@ -17,7 +17,7 @@ const SignUp = () => {
   const [password,setPassword] = useState()
   const [checkPass,setCheckPass] = useState()
   const [major,setMajor] = useState('ISE')
-  const [photoURL,setPhotoURL] = useState("no")
+  const photoURL="no"
 
   const checkValidity = () => {
     if(name === "" || surname === "" || password==="" || checkPass==="" ){
@@ -30,7 +30,7 @@ const SignUp = () => {
       return true
     }
   }
-  const sleep = m => new Promise(r => setTimeout(r, m))
+  // const sleep = m => new Promise(r => setTimeout(r, m))
   const register = () => {
     if(checkValidity()){
       axios.post('/register', {

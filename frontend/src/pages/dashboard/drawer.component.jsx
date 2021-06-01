@@ -1,5 +1,5 @@
 import React from 'react';
-import {Switch,Route} from 'react-router-dom';
+// import {Switch,Route} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -17,15 +17,12 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
-import Avatar from '@material-ui/core/Avatar';
+// import Avatar from '@material-ui/core/Avatar';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import ClassIcon from '@material-ui/icons/Class';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
-// import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import EqualizerIcon from '@material-ui/icons/Equalizer';
 
 const drawerWidth = 240;

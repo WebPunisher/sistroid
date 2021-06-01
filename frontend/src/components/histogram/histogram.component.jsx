@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from "react";
+import React,{useState} from "react";
 import './histogram.styles.scss';
 
 import { TextField } from '@material-ui/core';
@@ -41,43 +41,46 @@ const Histogram = props => {
     }
   return (
     <div className="histogram">
-        <div className="major-select">
-            <Select
-                defaultValue={majorOptions[0]}
-                label
-                onChange={handleChange}
-                name="colors"
-                options={majorOptions}
-                className="basic-multi-select"
-                classNamePrefix="select"
-            />
-        </div>
-         
+        
         <div className="searcHistogram">
-            {hType === "crn" ? 
-                <form className="nameFilter" noValidate autoComplete="off">
-                    <TextField onChange={ e => setCrn(e.target.value)} id="standard-basic" label=" CRN of the Course" />
-                </form>: null}
-            {hType === "class" ?
-                <form className="nameFilter" noValidate autoComplete="off">
-                    <TextField onChange={ e => setClassName(e.target.value)} id="standard-basic" label=" Class Name" />
-                </form>: null}
-            {hType === "teacher" ?
-                <form className="nameFilter" noValidate autoComplete="off">
-                    <TextField onChange={ e => setTeacherId(e.target.value)} id="standard-basic" label=" Id of teacher" />
-                </form>: null}
-            {hType === "teacher_class" ?
-                <form className="nameFilter" noValidate autoComplete="off">
-                    <TextField onChange={ e => setTeacherId(e.target.value)} id="standard-basic" label=" Id of teacher" /> &emsp;
-                    <TextField onChange={ e => setClassName(e.target.value)} id="standard-basic" label=" Class Name" />
-                </form>: null}
+            <div className="major-select">
+                <Select
+                    // defaultValue={majorOptions[0]}
+                    label
+                    onChange={handleChange}
+                    name="colors"
+                    options={majorOptions}
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                />
+            </div>
+
+            <div className="histogramFilterParent">
+                {hType === "crn" ? 
+                    <form className="nameFilter" noValidate autoComplete="off">
+                        <TextField className="myTextField" onChange={ e => setCrn(e.target.value)} id="standard-basic" label=" CRN of the Course" />
+                    </form>: null}
+                {hType === "class" ?
+                    <form className="nameFilter" noValidate autoComplete="off">
+                        <TextField onChange={ e => setClassName(e.target.value)} id="standard-basic" label=" Class Name" />
+                    </form>: null}
+                {hType === "teacher" ?
+                    <form className="nameFilter" noValidate autoComplete="off">
+                        <TextField onChange={ e => setTeacherId(e.target.value)} id="standard-basic" label=" Id of teacher" />
+                    </form>: null}
+                {hType === "teacher_class" ?
+                    <form className="nameFilter" noValidate autoComplete="off">
+                        <TextField onChange={ e => setTeacherId(e.target.value)} id="standard-basic" label=" Id of teacher" /> &emsp;
+                        <TextField onChange={ e => setClassName(e.target.value)} id="standard-basic" label=" Class Name" />
+                    </form>: null}
+            </div>
         
             <div className="buttonParent">
                 <Button className="searchButton" variant="contained" onClick={urlSetter}   > Search </Button>
             </div>
         </div>
         {imageUrl ? <img src = { imageUrl } alt="No such histogram" className="histogramImage" /> : null}
-        
+       
     </div>
   );
 };

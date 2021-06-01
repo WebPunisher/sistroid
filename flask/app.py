@@ -7,7 +7,6 @@ import histogram
 from copy import deepcopy
 from datetime import datetime as dt
 from hashlib import sha256
-# from crypto import Random
 try:
     from Crypto.Random import get_random_bytes
 except:
@@ -15,12 +14,10 @@ except:
     get_random_bytes = Random.get_random_bytes
 import sys
 
-# from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'passw0rd'
-# app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_PASSWORD'] = 'sarptalha'
 app.config['MYSQL_DB'] = 'itusis'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
