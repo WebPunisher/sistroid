@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React,{useState,useEffect} from "react";
 import { useHistory } from "react-router-dom";
 import axios from '../../axios.js';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,6 +17,21 @@ const SignIn= () => {
   const [password,setPassword] = useState()
   const [waiting,setWaiting] = useState(false)
 
+  useEffect(() => {
+    const listener = event => {
+      if (event.code === "Enter" || event.code === "NumpadEnter") {
+        // console.log("Enter key was pressed. Run your function.");
+        event.preventDefault();
+        login()
+      }
+    };
+    document.addEventListener("keydown", listener);
+    return () => {
+      document.removeEventListener("keydown", listener);
+    };
+  }, [studentNumber,password]);
+
+
   const checkValidity = () => {
     if(studentNumber === "" || password==="" ){
       alert("At least one of the inputs is empty")
@@ -26,7 +41,7 @@ const SignIn= () => {
     }
   }
   const sleep = m => new Promise(r => setTimeout(r, m))
-  const login = props  => {
+  const login = ()  => {
     console.log("sending name"+studentNumber)
     if(checkValidity()){
       axios.post('/login', {
@@ -49,9 +64,10 @@ const SignIn= () => {
     }
   }
 
+  
   return (
     <main>
-        
+        {studentNumber}{password}
       <section className="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
         <Container>
           <p className="text-center">
