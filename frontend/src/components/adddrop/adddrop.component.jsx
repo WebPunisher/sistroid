@@ -13,13 +13,18 @@ const AddDrop = props => {
 
   const [addList,setAddList] = useState(['','',''])
   const [dropList,setDropList] = useState(['','',''])
-  const [ongoingClasses,setOngoingClasses] = useState()
+  const [ongoingClasses,setOngoingClasses] = useState([])
 
-  useEffect(()=>{
-    axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}).then( res =>{
+  const pull_student_info = () =>
+  {
+	axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}).then( res =>{
       console.log(res.data.ongoing_classes)
         setOngoingClasses(res.data.ongoing_classes)
     })
+  }
+
+  useEffect(()=>{
+    pull_student_info()
   },[]) ;
 
   const increase = ( type ) => {
@@ -52,13 +57,14 @@ const AddDrop = props => {
       setDropList(newArr)
     }
   }
-  
+
   const drop_selected = () => {
     dropList.map(crn => 
 		axios.delete(`/student_remove_enrollment/${sessionStorage.getItem('id')}/${crn}`,
 			{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}
 		)
 	)
+	pull_student_info();
   }
 
   const add_selected = () => {
@@ -68,6 +74,7 @@ const AddDrop = props => {
 				{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}
 		)
 	)
+	pull_student_info();
   }
 
   return (
@@ -105,9 +112,9 @@ const AddDrop = props => {
         {dropList.map(crn => <div>{crn}</div>)}
       </div>
 
-      {ongoingClasses  ?  ongoingClasses.map((e)=>{
+      {ongoingClasses.map((e)=>{
           return <Class class_name={e.c_class_name} credits={e.credits} crn={e.crn}></Class>
-      }): null}
+      })}
     </div>
   );
 };

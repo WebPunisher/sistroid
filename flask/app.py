@@ -237,9 +237,19 @@ def add_to_db(entry):
     
     if not authenticate(request) and entry != "enrollment": abort(403) #students can modify enrollments
     if not authenticate(request,request.json["id"]): abort(403) #rest can only be modified by teachers
+
+    cur = mysql.connection.cursor()    
+    if entry == "enrollment":
+        cur.execute("""
+        select * from classes,semesters
+        where
+        (classes.created_at between end_date and start_date) and
+        (current_timestamp() between end_date and start_date) and
+        crn = %s;
+        """,(request.json["crn"],))
+        if not cur.fetchone(): abort(403) #check semester of the class
     
     if entry in add_to_db_querries:
-        cur = mysql.connection.cursor()
         cur.execute(add_to_db_querries[entry],tuple(request.json.values()))
         mysql.connection.commit()
         return "added entry"
