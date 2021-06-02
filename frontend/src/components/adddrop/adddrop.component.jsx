@@ -23,14 +23,14 @@ const AddDrop = props => {
   },[]) ;
 
   const increase = ( type ) => {
-    if (type == "add"){
+    if (type === "add"){
       setAddList([...addList,''])
     } else {
       setDropList([...dropList,''])
     }
   }
   const decrease = ( type ) => {
-    if (type == "add"){
+    if (type === "add"){
       let newArr = [...addList]
       newArr.pop()
       setAddList(newArr)
@@ -42,7 +42,7 @@ const AddDrop = props => {
     
   }
   const inputChangeHandler = (index,value,type) => {
-    if (type == "add"){
+    if (type === "add"){
       let newArr =[...addList]
       newArr[index]=value
       setAddList(newArr)

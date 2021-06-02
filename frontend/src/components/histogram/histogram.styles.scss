@@ -1,23 +1,22 @@
 .histogram{
-
-    .major-select{
-        width: 20%;
-        display: inline-block;
-        margin-bottom: -30px !important;
-    }
+    
+    
     .searcHistogram{
         text-align: center;
+        display: flex;
+        justify-content: center;
 
-        .nameFilter{
-            display: inline-block;
+        margin-right: 25px;
+        .major-select{
+            width: 20%;
+            margin: 10px;
         }
+        
         .buttonParent{
-            margin: 8px;
-            display: inline-block;
+            margin: 10px;
         }
         .searchButton{
             display: inline-block;
-            margin-bottom: -30px;
         }
     }
 
@@ -25,5 +24,9 @@
         margin-top: 70px;
         margin-left: 10%;
         width: 600px;
+    }
+
+    .myTextField{
+        display: inline-flex;
     }
 }

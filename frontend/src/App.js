@@ -2,7 +2,7 @@ import {BrowserRouter, Switch,Route} from 'react-router-dom';
 
 import SignIn from './pages/sign/signin.component';
 import SignUp from './pages/sign/signup.component';
-import HomePage from './pages/anotherpage/page.component';
+import HomePage from './pages/anotherpage/homepage.component';
 import Dashboard from './pages/dashboard/dashboard.component';
 import ScrollToTop from './components/ScrollToTop.component';
 

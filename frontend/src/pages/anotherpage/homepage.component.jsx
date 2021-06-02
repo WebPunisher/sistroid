@@ -9,10 +9,7 @@ import './assets/vendor/bootstrap/css/bootstrap.min.css';
 import './assets/vendor/remixicon/remixicon.css';
 
 import banner from './assets/img/hero-img.png';
-import sarp from './assets/img/team/sarp.png'
 import talha from './assets/img/team/talha.jpg'
-import team1 from './assets/img/team/team-1.jpg';
-import team2 from './assets/img/team/team-3.jpg';
 
  const Homepage = () =>{
 
@@ -473,7 +470,7 @@ import team2 from './assets/img/team/team-3.jpg';
                 <p>+90 5072707643</p>
               </div>
 
-              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3006.478086934154!2d29.01785755094263!3d41.10224872148414!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab5dd2032fb11%3A0x629c5e4a976cff27!2zTWFzbGFrLCDEsFTDnCBBeWF6YcSfYSBLYW1ww7xzw7wsIDM0NDg1IFNhcsSxeWVyL8Swc3RhbmJ1bA!5e0!3m2!1sen!2str!4v1622562724856!5m2!1sen!2str" width="400" height="390"  allowfullscreen="" loading="lazy"></iframe>
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3006.478086934154!2d29.01785755094263!3d41.10224872148414!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab5dd2032fb11%3A0x629c5e4a976cff27!2zTWFzbGFrLCDEsFTDnCBBeWF6YcSfYSBLYW1ww7xzw7wsIDM0NDg1IFNhcsSxeWVyL8Swc3RhbmJ1bA!5e0!3m2!1sen!2str!4v1622562724856!5m2!1sen!2str" width="400" height="390"  title="temp" allowfullscreen="" loading="lazy"></iframe>
               {/* <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12097.433213460943!2d-74.0062269!3d40.7101282!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xb89d1fe6bc499443!2sDowntown+Conference+Center!5e0!3m2!1smk!2sbg!4v1539943755621" frameborder="0"  allowfullscreen></iframe> */}
             </div>
 
