@@ -252,14 +252,17 @@ def remove_from_db(entry,id_num):
         cur = mysql.connection.cursor()
         cur.execute(delete_from_db_querries[entry],(id_num))
         mysql.connection.commit()
-        return "removed "+str(id_num)
+        return "removed entry"
 
 @app.route('/student_remove_<entry>/<id_num>/<crn>',methods = ["DELETE"])
 @cross_origin()
 def remove_from_db_two_args(entry,id_num,crn):
     
     if not authenticate(request) and entry == "grades": abort(403) #only teachers can modify grades
-    if not authenticate(request,id_num): abort(403) #students can modify enrollments but only theirs
+    if (
+        not authenticate(request,id_num) or
+        int(crn) not in [i["crn"] for i in get_student_info(id_num)["ongoing_classes"]]
+    ): abort(403) #students can modify enrollments but only theirs
     
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
@@ -321,6 +324,12 @@ def deneme():
         for enrol in crn_dict:
             for crn_num in crn_dict[enrol]:
                 cur.execute(add_to_db_querries["grade"],(enrol,list(grade_translation.keys())[random.randint(0,7)],crn_num))
+
+        cur.execute("""
+        delete grades from grades,classes 
+        where grades.crn = classes.crn
+        and classes.c_class_name > 'ISE300';
+        """)
 
         mysql.connection.commit()
         return ("success1")
