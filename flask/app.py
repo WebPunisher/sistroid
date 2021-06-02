@@ -234,7 +234,10 @@ def login():
 @app.route('/add_<entry>',methods = ["POST"])
 @cross_origin()
 def add_to_db(entry):
-    if not authenticate(request): abort(403)
+    
+    if not authenticate(request) and entry != "enrollment": abort(403) #students can modify enrollments
+    if not authenticate(request,request.json["ID"]): abort(403) #rest can only be modified by teachers
+    
     if request.method == "POST" and entry in add_to_db_querries:
         cur = mysql.connection.cursor()
         cur.execute(add_to_db_querries[entry],tuple(request.json.values()))
@@ -254,7 +257,10 @@ def remove_from_db(entry,id_num):
 @app.route('/student_remove_<entry>/<id_num>/<crn>',methods = ["DELETE"])
 @cross_origin()
 def remove_from_db_two_args(entry,id_num,crn):
-    if not authenticate(request): abort(403)
+    
+    if not authenticate(request) and entry == "grades": abort(403) #only teachers can modify grades
+    if not authenticate(request,id_num): abort(403) #students can modify enrollments but only theirs
+    
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
         cur.execute(delete_from_db_querries[entry],(id_num,crn))
@@ -288,6 +294,7 @@ def deneme():
         sample_majors = ["ISE","BLG"]
         
         cur.execute(add_to_db_querries["semester"],(2021,"spring","2021-01-28 20:53:41","2021-07-28 20:53:41"))
+        cur.execute(add_to_db_querries["semester"],(2020,"spring","2020-01-28 20:53:41","2020-07-28 20:53:41"))
         
         for i in data['people']:
             mail_adress = (i.split(" ")[1]+i.split(" ")[0][:2]+str(dt.now().year%2000)+"@itu.edu.tr").lower()
@@ -299,13 +306,15 @@ def deneme():
         for i in data['topics']:
             cur.execute(add_to_db_querries["topic"],(i,"Temporary description",random.randint(2,4)))
         
-        for i in range(20):
-            cur.execute(add_to_db_querries["class"],(data['topics'][i%15],i%9+1))
+        for i in range(40):
+            cur.execute(add_to_db_querries["class"],(data['topics'][i%30],i%9+1))
+                
+        cur.execute("update classes set created_at = '2020-05-30 20:26:38' where c_class_name < 'ISE300';")
 
         crn_dict = dict()
         for i in range(9,50):
-            num = random.randint(1,16)
-            crn_dict[i] = [num,(num+1)%15+1,(num+2)%15+1,(num+3)%15+1]
+            num = random.randint(1,31) 
+            crn_dict[i] = [(num+v*3)%40+1 for v in range(8)]
             for j in crn_dict[i]:
                 cur.execute(add_to_db_querries["enrollment"],(i,j))
     
@@ -381,13 +390,15 @@ def get_student_info(student_id):
     
     cur.execute(
     '''
-    select classes.crn,c_class_name from classes 
+    select classes.crn,c_class_name,semester_season,semester_year from classes 
     inner join enrollment on 
     classes.crn = enrollment.crn
     inner join topics on
     classes.c_class_name = topics.class_name
     inner join students on 
     students.person_id = enrollment.student_id
+    inner join semesters on 
+    classes.created_at between end_date and start_date
     where students.person_id = %s;
     ''',(student_id,))
     
