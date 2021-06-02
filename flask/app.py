@@ -261,14 +261,14 @@ def remove_from_db_two_args(entry,id_num,crn):
     if not authenticate(request) and entry == "grades": abort(403) #only teachers can modify grades
     if (
         not authenticate(request,id_num) or
-        int(crn) not in [i["crn"] for i in get_student_info(id_num)["ongoing_classes"]]
+        int(crn) not in [i["crn"] for i in get_student_ongoing(id_num)]
     ): abort(403) #students can modify enrollments but only theirs
     
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
         cur.execute(delete_from_db_querries[entry],(id_num,crn))
         mysql.connection.commit()
-        return "removed "+str(id_num)
+        return "removed entry"
 
 @app.route("/clear_all_tables")
 @cross_origin()
@@ -361,7 +361,7 @@ def get_ranking(major):
     GPA_LIST=[]
     for person in people:
         person_name = person["pname"] + " " + person["psurname"]
-        person_gpa = get_student_info(person["person_id"])["GPA"]
+        person_gpa = get_avg_grade(get_student_grades(person["person_id"]))
         GPA_LIST.append((person_name,person_gpa))
         
     GPA_LIST.sort(key = lambda x: x[1],reverse=True)
@@ -373,11 +373,17 @@ def get_ranking(major):
 def student_info(student_id):
     if not authenticate(request,student_id): abort(403)
     
-    if request.method == "GET":
-        response = jsonify(get_student_info(student_id))
-        return response    
+    grades = get_student_grades(student_id)
+    response = jsonify({
+        "classes": get_student_classes(student_id),
+        "ongoing_classes": get_student_ongoing(student_id),
+        "grades": grades,
+        "GPA" : get_avg_grade(grades),
+        "personal_information": get_student_info(student_id)})
+   
+    return response    
     
-def get_student_info(student_id):
+def get_student_ongoing(student_id):
     cur = mysql.connection.cursor()   
     
     cur.execute(
@@ -396,7 +402,10 @@ def get_student_info(student_id):
     ''',(student_id,))
     
     ongoing_classes = cur.fetchall()
+    return ongoing_classes
     
+def get_student_classes(student_id):
+    cur = mysql.connection.cursor()   
     cur.execute(
     '''
     select classes.crn,c_class_name,semester_season,semester_year from classes 
@@ -412,7 +421,10 @@ def get_student_info(student_id):
     ''',(student_id,))
     
     classes = cur.fetchall()
+    return classes
     
+def get_student_grades(student_id):
+    cur = mysql.connection.cursor()   
     cur.execute(
     '''
     select grades.crn,topics.class_name,grade,topics.credits from students
@@ -428,15 +440,17 @@ def get_student_info(student_id):
     ''',(student_id,))
 
     grades = cur.fetchall()
+    return grades
     
+def get_student_info(student_id):
+    cur = mysql.connection.cursor()   
     cur.execute(
     '''
     select pname,psurname,mail,major,photo_url from students where person_id = %s
     ''',(student_id,))       
     
     info= cur.fetchone()
-    
-    return {"classes":classes,"ongoing_classes":ongoing_classes,"grades":grades,"GPA":get_avg_grade(grades),"personal_information":info}
+    return info
         
 @app.route('/crn_info/<crn>',methods = ["GET"])
 @cross_origin()
@@ -520,17 +534,19 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
     desired_gpa = float(desired_gpa)
     
     #data procurement
-    student_data = get_student_info(student_num)
-    credits = [grade["credits"] for grade in student_data["grades"]]
+    grades = get_student_grades(student_num)
+    gpa = get_avg_grade(grades)
+    
+    credits = [grade["credits"] for grade in grades]
     total_credits = sum(credits)
     
     #required quality credit calculation
-    quality_credits = total_credits * student_data["GPA"] * 0.25
+    quality_credits = total_credits * gpa * 0.25
     desired_quality_credits = total_credits * desired_gpa * 0.25
     required_quality_credits = desired_quality_credits - quality_credits
     
     #check improveable classes
-    improveable = [grade for grade in student_data["grades"] if grade["grade"] > "CB"]
+    improveable = [grade for grade in grades if grade["grade"] > "CB"]
     improveable.sort(key = lambda x: x["grade"], reverse=True)
     improveable = improveable[:4] #take 4 lowest grades below CC
     
@@ -539,18 +555,18 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
     if new_grades:
         changed_grades = []
         for grade in new_grades:
-            if not grade in student_data["grades"]:
+            if not grade in grades:
                 changed_grades.append(grade)
         
-        response = {"old_grades" : student_data["grades"],
+        response = {"old_grades" : grades,
                     "new_grades" : changed_grades,
-                    "old_gpa" : student_data["GPA"],
+                    "old_gpa" : gpa,
                     "new_gpa" : ((quality_credits+required_quality_credits-q_c)/total_credits)*4,
                     "required quality credits" : required_quality_credits}
     else:
-        response = {"old_grades" : student_data["grades"],
+        response = {"old_grades" : grades,
                     "new_grades" : "Not reachable ):",
-                    "old_gpa" : student_data["GPA"],
+                    "old_gpa" : gpa,
                     "new_gpa" : "4.0 (in your dreams)",
                     "required quality credits" : "infinite lmao"}        
     
