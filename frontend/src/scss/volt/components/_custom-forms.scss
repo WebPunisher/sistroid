@@ -75,7 +75,7 @@
         color: $light;
         &:before {
 			content: "\f005";
-			font-family: "Font Awesome 5 Free";
+			font-family: "Font Awesome 5 Free",Sans-serif;
 			font-weight: 900;
 			transition: all .2s ease;
 			font-size: 1.0625rem;

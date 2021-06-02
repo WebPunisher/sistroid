@@ -34,7 +34,7 @@ const MyClasses = () => {
     return (
         
         <div className="myclasses">
-            {ongoingClasses & gradedClasses ?  ongoingClasses.filter((clss) => contains(clss.crn)).map((e)=>{
+            {ongoingClasses && gradedClasses ?  ongoingClasses.filter((clss) => contains(clss.crn)).map((e)=>{
                 return <Class key={e.crn} class_name={e.class_name} credits={e.credits} crn={e.crn}></Class>
             }): null}
             { gradedClasses ? gradedClasses.map((e)=>{
