@@ -565,13 +565,12 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
                     "required quality credits" : required_quality_credits}
     else:
         response = {"old_grades" : grades,
-                    "new_grades" : "Not reachable ):",
+                    "new_grades" : [],
                     "old_gpa" : gpa,
                     "new_gpa" : "4.0 (in your dreams)",
-                    "required quality credits" : "infinite lmao"}        
+                    "required_quality_credits" : "infinite lmao"}        
     
     response= jsonify(response)
-    response.headers.add("Access-Control-Allow-Origin", "*")
     return response
   
 @app.route('/reset')
