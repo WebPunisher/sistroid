@@ -11,12 +11,12 @@ import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 
 const AddDrop = props => {
 
-  const [addList,setAddList] = useState(['s','k','l'])
+  const [addList,setAddList] = useState(['','',''])
   const [dropList,setDropList] = useState(['','',''])
   const [ongoingClasses,setOngoingClasses] = useState()
 
   useEffect(()=>{
-    axios.get('/student_info/12').then( res =>{
+    axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}).then( res =>{
       console.log(res.data.ongoing_classes)
         setOngoingClasses(res.data.ongoing_classes)
     })
@@ -52,6 +52,23 @@ const AddDrop = props => {
       setDropList(newArr)
     }
   }
+  
+  const drop_selected = () => {
+    dropList.map(crn => 
+		axios.delete(`/student_remove_enrollment/${sessionStorage.getItem('id')}/${crn}`,
+			{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}
+		)
+	)
+  }
+
+  const add_selected = () => {
+    addList.map(crn => 
+		axios.post(`/add_enrollment`,
+				{id:sessionStorage.getItem('id'),"crn":crn},
+				{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}
+		)
+	)
+  }
 
   return (
     <div className="addDrop">
@@ -69,7 +86,7 @@ const AddDrop = props => {
         )}
         <AddCircleIcon className="addCrn" onClick={() => increase("add")}/>
         <RemoveCircleIcon className="removeCrn" onClick={() => decrease("add")}/>
-        <button> Add Selected Courses</button>
+        <button onClick={add_selected}> Add Selected Courses</button>
         {addList.map(crn => <div>{crn}</div>)}
       </div>
       <div className="addClass">
@@ -84,7 +101,7 @@ const AddDrop = props => {
         )}
         <AddCircleIcon className="addCrn" onClick={() => increase("drop")}/>
         <RemoveCircleIcon className="removeCrn" onClick={() => decrease("drop")}/>
-        <button> Drop Selected Courses </button>
+        <button onClick={drop_selected}> Drop Selected Courses </button>
         {dropList.map(crn => <div>{crn}</div>)}
       </div>
 

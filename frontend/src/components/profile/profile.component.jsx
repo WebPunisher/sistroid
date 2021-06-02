@@ -18,8 +18,8 @@ const Profile = props => {
     axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}})
     .then((response) => {
       console.log(response.data);
-      setInfo(response.data.personal_information)
-      setGpa(response.data.GPA)
+      setInfo(response.data.personal_information);
+      setGpa(response.data.GPA);
     }, (error) => {
       console.log(error);
     });
@@ -30,7 +30,7 @@ const Profile = props => {
     <div className="profilePage">
       {info?
         <div>
-          <img className="profileImage" alt="profileImage" src="https://images.unsplash.com/photo-1504593811423-6dd665756598?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"/>
+          <img src={info.photo_url} className="profileImage" alt="profileImage"/>
           <div className="generalInfo">
               <div className="infoHeader"> General Information </div>
               <div className="profileInput"><span className="boldClass">Name  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;</span>{info.pname} {info.psurname} </div>
