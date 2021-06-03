@@ -398,7 +398,7 @@ def get_student_ongoing(student_id):
     
     cur.execute(
     '''
-    select classes.crn,c_class_name,topics.credits from classes 
+    select classes.crn,c_class_name,semester_season,semester_year,topics.credits from classes 
     inner join enrollment on 
     classes.crn = enrollment.crn
     inner join topics on
@@ -437,7 +437,7 @@ def get_student_grades(student_id):
     cur = mysql.connection.cursor()   
     cur.execute(
     '''
-    select grades.crn,topics.class_name,grade,topics.credits from students
+    select grades.crn,topics.class_name,grade,topics.credits,semester_season,semester_year from students
     inner join grades on 
     grades.student_id = students.person_id
     inner join enrollment on 
@@ -446,6 +446,8 @@ def get_student_grades(student_id):
     enrollment.crn = classes.crn
     inner join topics on 
     topics.class_name = classes.c_class_name
+    inner join semesters on 
+    classes.created_at between end_date and start_date
     where students.person_id = %s;
     ''',(student_id,))
 
