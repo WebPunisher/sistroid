@@ -325,7 +325,7 @@ def deneme():
         cur.execute("update classes set created_at = '2020-05-30 20:26:38' where c_class_name < 'ISE300';")
 
         crn_dict = dict()
-        for i in range(9,50):
+        for i in range(9,len(data["people"])):
             num = random.randint(1,31) 
             crn_dict[i] = [(num+v*3)%40+1 for v in range(8)]
             for j in crn_dict[i]:
