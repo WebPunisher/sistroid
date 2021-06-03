@@ -327,7 +327,7 @@ def deneme():
         crn_dict = dict()
         for i in range(9,len(data["people"])):
             num = random.randint(1,31) 
-            crn_dict[i] = [(num+v*3)%40+1 for v in range(8)]
+            crn_dict[i] = [(num+v*3)%40+1 for v in range(13)]
             for j in crn_dict[i]:
                 cur.execute(add_to_db_querries["enrollment"],(i,j))
     
