@@ -39,8 +39,11 @@ const MyClasses = () => {
 
             {studentData.grades.sort((f,s)=>(f.created_at > s.created_at ? 1:-1)) //Sort classes to display them in chronological order
 			.map((e)=>{
-                return <Class class_name={e.class_name} credits={e.credits} crn={e.crn} grade={e.grade} semester = {e.semester_season + e.semester_year}/>
+                return <Class key={e.crn} class_name={e.class_name} credits={e.credits} crn={e.crn} grade={e.grade} semester = {e.semester_season + e.semester_year}/>
             })}
+			<br/>
+			<p> GPA: {studentData.GPA} </p>
+			<p> credits: {studentData.grades.map((grade) => (grade.credits)).reduce((f, s) => f + s, 0)} </p>
 
 			<br/> <h1>Ongoing classes</h1> <br/>
 

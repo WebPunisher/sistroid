@@ -398,7 +398,7 @@ def get_student_ongoing(student_id):
     
     cur.execute(
     '''
-    select classes.crn,c_class_name,semester_season,semester_year,topics.credits from classes 
+    select classes.crn,class_name,semester_season,semester_year,topics.credits from classes 
     inner join enrollment on 
     classes.crn = enrollment.crn
     inner join topics on
