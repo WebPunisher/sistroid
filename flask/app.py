@@ -1,4 +1,4 @@
-from flask import Flask,request,jsonify,abort
+from flask import Flask,request,jsonify,Response
 from flask_cors import cross_origin
 from flask_mysqldb import MySQL
 import json
@@ -23,6 +23,12 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
 sessions = {}
+
+#abort with cors
+def abort(code):
+    print("aborting",file=sys.stderr)
+    response = jsonify(status = code)
+    return response,code
 
 @app.route("/create_tables")
 @cross_origin()
@@ -193,24 +199,24 @@ def register():
     return response
     
 def authenticate(req,subject_id = 0xffffffff):
-    #try:
-    number = int(req.headers["Id"])
-    token = req.headers["Token"]
-
-    cur = mysql.connection.cursor()
-    cur.execute("select * from students where person_id = %s",(number,))
+    try:
+        number = int(req.headers["Id"])
+        token = req.headers["Token"]
     
-    user = cur.fetchone()
-    print(number, subject_id, number == int(subject_id) ,sessions[number] == token,'\n',sessions[number] , token, file=sys.stderr)
-    if user:
-        return subject_id != "super" and number == int(subject_id) and sessions[number] == token
-    else:
-        cur.execute("select * from teachers where person_id = %s",(number,))
-        user = cur.fetchone()
-        return user and sessions[number] == token
+        cur = mysql.connection.cursor()
+        cur.execute("select * from students where person_id = %s",(number,))
         
-    #except:
-        #return False
+        user = cur.fetchone()
+        print(number, subject_id, number == int(subject_id) ,sessions[number] == token,'\n',sessions[number] , token, file=sys.stderr)
+        if user:
+            return subject_id != "super" and number == int(subject_id) and sessions[number] == token
+        else:
+            cur.execute("select * from teachers where person_id = %s",(number,))
+            user = cur.fetchone()
+            return user and sessions[number] == token
+        
+    except:
+        return False
 
 @app.route('/login', methods = ["POST"])
 @cross_origin()
@@ -235,8 +241,8 @@ def login():
 @cross_origin()
 def add_to_db(entry):
     
-    if not authenticate(request) and entry != "enrollment": abort(403) #students can modify enrollments
-    if not authenticate(request,request.json["id"]): abort(403) #rest can only be modified by teachers
+    if not authenticate(request) and entry != "enrollment": return abort(403) #students can modify enrollments
+    if not authenticate(request,request.json["id"]): return abort(403) #rest can only be modified by teachers
 
     cur = mysql.connection.cursor()    
     if entry == "enrollment":
@@ -247,7 +253,7 @@ def add_to_db(entry):
         (current_timestamp() between end_date and start_date) and
         crn = %s;
         """,(request.json["crn"],))
-        if not cur.fetchone(): abort(403) #check semester of the class
+        if not cur.fetchone(): return abort(403) #check semester of the class
     
     if entry in add_to_db_querries:
         cur.execute(add_to_db_querries[entry],tuple(request.json.values()))
@@ -257,7 +263,7 @@ def add_to_db(entry):
 @app.route('/remove_<entry>/<id_num>',methods = ["DELETE"])
 @cross_origin()
 def remove_from_db(entry,id_num):
-    if not authenticate(request): abort(403)
+    if not authenticate(request): return abort(403)
     if request.method == "DELETE" and entry in ["user","topic","class"]:
         cur = mysql.connection.cursor()
         cur.execute(delete_from_db_querries[entry],(id_num))
@@ -268,11 +274,11 @@ def remove_from_db(entry,id_num):
 @cross_origin()
 def remove_from_db_two_args(entry,id_num,crn):
     
-    if not authenticate(request) and entry == "grades": abort(403) #only teachers can modify grades
+    if not authenticate(request) and entry == "grades": return abort(403) #only teachers can modify grades
     if (
         not authenticate(request,id_num) or
         int(crn) not in [i["crn"] for i in get_student_ongoing(id_num)]
-    ): abort(403) #students can modify enrollments but only theirs
+    ): return abort(403) #students can modify enrollments but only theirs
     
     if request.method == "DELETE" and entry in ["grades","enrollment"]:
         cur = mysql.connection.cursor()
@@ -381,7 +387,7 @@ def get_ranking(major):
 @app.route('/student_info/<student_id>',methods = ["GET"])
 @cross_origin()
 def student_info(student_id):
-    if not authenticate(request,student_id): abort(403)
+    if not authenticate(request,student_id): return abort(401)
     
     grades = get_student_grades(student_id)
     response = jsonify({
@@ -392,7 +398,27 @@ def student_info(student_id):
         "personal_information": get_student_info(student_id)})
    
     return response    
+
+@app.route('/avaliable_classes',methods = ["GET"])
+@cross_origin()
+def avaliable_classes():
+    cur = mysql.connection.cursor()   
     
+    cur.execute(
+    '''
+    select classes.crn,class_name,topics.credits,concat (teachers.pname,' ',teachers.psurname) as pname from classes 
+    inner join topics on
+    classes.c_class_name = topics.class_name
+    inner join semesters on 
+    (classes.created_at between end_date and start_date) and
+    (current_timestamp() between end_date and start_date)
+    inner join teachers on 
+    teachers.person_id = classes.c_teacher_id;
+    ''')
+    
+    avaliable = cur.fetchall()
+    return jsonify(avaliable)
+
 def get_student_ongoing(student_id):
     cur = mysql.connection.cursor()   
     
@@ -468,7 +494,7 @@ def get_student_info(student_id):
 @cross_origin()
 def get_crn_info(crn):
     response= jsonify(crn_info(crn))
-    response.headers.add("Access-Control-Allow-Origin", "*")
+    #response.headers.add("Access-Control-Allow-Origin", "*")
     return response    
     
 def crn_info(crn):
@@ -540,7 +566,7 @@ def grade_search(quality_c, avaliable_c, classes, class_index = 0):
 @app.route('/mentor/<student_num>/<avaliable_credits>/<desired_gpa>')
 @cross_origin()
 def gpa_mentor(student_num,avaliable_credits,desired_gpa):
-    if not authenticate(request,student_num): abort(403)
+    if not authenticate(request,student_num): return abort(401)
     
     avaliable_credits = int(avaliable_credits)
     desired_gpa = float(desired_gpa)
