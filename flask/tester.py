@@ -19,9 +19,9 @@ def test_student_auth():
     if not r.status_code == 200: fail("student cant drop own classes")
     
     r = requests.get(url="http://localhost:1999/student_info/15", headers={"id":"14","token":token})    
-    if not r.status_code == 403: fail("Authenticated unauthorized student")
+    if not r.status_code == 401: fail("Authenticated unauthorized student")
     r = requests.get(url="http://localhost:1999/student_info/14", headers={"id":"14","token":"token"})    
-    if not r.status_code == 403: fail("wrong token returned results")
+    if not r.status_code == 401: fail("wrong token returned results")
 
     print("student authorization test passed")
 
@@ -32,7 +32,7 @@ def test_teacher_auth():
     r = requests.get(url="http://localhost:1999/student_info/14", headers={"id":"1","token":token})    
     if not r.status_code == 200: fail("can't read student data as teacher")
     r = requests.get(url="http://localhost:1999/student_info/14", headers={"id":"1","token":"token"})    
-    if not r.status_code == 403: fail("wrong token returned results")
+    if not r.status_code == 401: fail("wrong token returned results")
 
     print("teacher authorization test passed")
 
