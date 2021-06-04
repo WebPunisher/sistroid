@@ -54,6 +54,36 @@
 
   ],
   "teachers": [ "Paul Doran", "John Dinkins", "Steve Ferry", "Carl Zeller", "Frank Shaffer", "Walter Lewis", "Ty Rice", "Victor Ebner", "Matthew Schickowski" ],
-  "topics": [ "ISE301", "ISE302", "ISE303", "ISE304", "ISE305", "ISE306", "ISE307", "ISE308", "ISE309", "ISE310", "ISE311", "ISE312", "ISE313", "ISE314", "ISE315",
-   "ISE216", "ISE217", "ISE218", "ISE219", "ISE220", "ISE221", "ISE222", "ISE223", "ISE224", "ISE225", "ISE226", "ISE227", "ISE228", "ISE229", "ISE230" ]
+  "topics": [
+    "ISE301",
+    "ISE302",
+    "ISE303",
+    "ISE304",
+    "ISE305",
+    "ISE306",
+    "ISE307",
+    "ISE308",
+    "ISE309",
+    "ISE310",
+    "ISE311",
+    "ISE312",
+    "ISE313",
+    "ISE314",
+    "ISE315",
+    "ISE216",
+    "ISE217",
+    "ISE218",
+    "ISE219",
+    "ISE220",
+    "ISE221",
+    "ISE222",
+    "ISE223",
+    "ISE224",
+    "ISE225",
+    "ISE226",
+    "ISE227",
+    "ISE228",
+    "ISE229",
+    "ISE230"
+  ]
 }

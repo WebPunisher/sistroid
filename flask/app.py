@@ -346,7 +346,10 @@ def deneme():
         where grades.crn = classes.crn
         and classes.c_class_name > 'ISE300';
         """)
-
+        
+        for command in open("sarp_sql.sql","r").read().split(";")[:-1]:
+            cur.execute(command)
+        
         mysql.connection.commit()
         return ("success1")
 
@@ -598,7 +601,7 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
     new_grades,q_c = grade_search(required_quality_credits,avaliable_credits,deepcopy(current+improveable))
     new_gpa = ((quality_credits+required_quality_credits-q_c)/(total_credits+avaliable_credits))*4
     
-    if new_gpa >= desired_gpa:
+    if new_gpa >= desired_gpa and new_grades:
         changed_grades = []
         for grade in new_grades:
             if not grade in grades:
