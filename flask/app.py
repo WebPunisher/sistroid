@@ -571,6 +571,12 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
     avaliable_credits = int(avaliable_credits)
     desired_gpa = float(desired_gpa)
     
+    #get the student data for current classes
+    current = list(get_student_ongoing(student_num))   
+    for cls in current:
+        cls["grade"] = "FF" #presume FF to be base grade since these ones arenot graded yet
+    avaliable_credits += sum([i["credits"] for i in current])    
+    
     #data procurement
     grades = get_student_grades(student_num)
     gpa = get_avg_grade(grades)
@@ -580,17 +586,19 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
     
     #required quality credit calculation
     quality_credits = total_credits * gpa * 0.25
-    desired_quality_credits = total_credits * desired_gpa * 0.25
+    desired_quality_credits = (total_credits+avaliable_credits) * desired_gpa * 0.25
     required_quality_credits = desired_quality_credits - quality_credits
     
-    #check improveable classes
+    #check improveable classes (only matters if avaliable credits > 0)
     improveable = [grade for grade in grades if grade["grade"] > "CB"]
     improveable.sort(key = lambda x: x["grade"], reverse=True)
     improveable = improveable[:4] #take 4 lowest grades below CC
     
-    new_grades,q_c = grade_search(required_quality_credits,avaliable_credits,deepcopy(improveable))
     
-    if new_grades:
+    new_grades,q_c = grade_search(required_quality_credits,avaliable_credits,deepcopy(current+improveable))
+    new_gpa = ((quality_credits+required_quality_credits-q_c)/(total_credits+avaliable_credits))*4
+    
+    if new_gpa >= desired_gpa:
         changed_grades = []
         for grade in new_grades:
             if not grade in grades:
@@ -599,7 +607,7 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
         response = {"old_grades" : grades,
                     "new_grades" : changed_grades,
                     "old_gpa" : gpa,
-                    "new_gpa" : ((quality_credits+required_quality_credits-q_c)/total_credits)*4,
+                    "new_gpa" : new_gpa,
                     "required quality credits" : required_quality_credits}
     else:
         response = {"old_grades" : grades,
