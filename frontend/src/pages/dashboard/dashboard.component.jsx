@@ -12,6 +12,7 @@ import GpaMentor from '../../components/gpamentor/gpamentor.component';
 import AddDrop from '../../components/adddrop/adddrop.component';
 import Histogram from '../../components/histogram/histogram.component';
 import Profile from '../../components/profile/profile.component';
+import Deneme from '../../components/deneme/deneme.component';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -50,6 +51,7 @@ const Dashboard = ()  => {
           <Route path='/dashboard/add_drop' component={AddDrop}/>
           <Route path='/dashboard/histogram' component={Histogram}/>
           <Route path='/dashboard/profile' component={Profile}/>
+          <Route path="/dashboard/deneme" component={Deneme}/>
 
         </Switch>
 
