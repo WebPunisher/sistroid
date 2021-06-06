@@ -2,13 +2,13 @@ import React,{useState,useEffect} from "react";
 import './gpamentor.styles.scss';
 import { TextField } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
 import axios from '../../axios';
 
 
 const GpaMentor = props => {
   
-  const [init,setInit] = useState()
+  const [fetching,setFetching] = useState()
   const [gpa,set_gpa] = useState(4)
   const [credits,set_credits] = useState(0)
 
@@ -21,11 +21,13 @@ const GpaMentor = props => {
   })
 
   const Fetch_mentor_info = () => {
+		setFetching(true)
 		axios.get(`/mentor/${sessionStorage.getItem('id')}/${credits}/${gpa}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}})
 			.then
 			(
 				(response) => {
 					set_gpa_data(response.data);
+					setFetching(false)
 				}
 			);
 	}
@@ -37,15 +39,19 @@ const GpaMentor = props => {
 		 <TextField className="myTextField" onChange={ e => set_gpa(e.target.value)} id="standard-basic" label=" Desired gpa" />
 		 <Button className="searchButton" variant="contained" onClick = {Fetch_mentor_info}> Enter </Button>
 
-		 <p> old gpa: {gpa_data.old_gpa} </p>
-		 <ul>
-			  {gpa_data.old_grades.map((grade) => <li> {grade.class_name}, grade = {grade.grade} </li>)}
-		</ul>
+		{ fetching ? <div><CircularProgress/></div> :
+		 <div>
+			 <p> old gpa: {gpa_data.old_gpa} </p>
+			<ul>
+				{gpa_data.old_grades.map((grade) => <li> {grade.class_name}, grade = {grade.grade} </li>)}
+			</ul>
+			
+			<p> new gpa: {gpa_data.new_gpa} </p>
+			<ul>
+				{gpa_data.new_grades.map((grade) => <li> {grade.class_name}, required grade = {grade.grade} </li>)}
+			</ul>
+		 </div>}
 		 
-		 <p> new gpa: {gpa_data.new_gpa} </p>
-		 <ul>
-			  {gpa_data.new_grades.map((grade) => <li> {grade.class_name}, required grade = {grade.grade} </li>)}
-		</ul>
     </div>
   );
 };

@@ -18,6 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 // import Avatar from '@material-ui/core/Avatar';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import ClassIcon from '@material-ui/icons/Class';
@@ -104,6 +105,11 @@ const Drawere = ()  => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
+  const logout = () => {
+    sessionStorage.setItem('token', 0)
+    sessionStorage.setItem('id', 0)
+  }
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -177,19 +183,19 @@ const Drawere = ()  => {
           <Link to="/dashboard/myclasses" >
             <ListItem button>
                 <ListItemIcon><ClassIcon /></ListItemIcon>
-                <ListItemText primary="My Classes(NA)" />
+                <ListItemText primary="My Classes(" />
             </ListItem>
           </Link>
           <Link to="/dashboard/gpa_mentor" >
             <ListItem button>
                 <ListItemIcon><AssignmentTurnedInIcon/></ListItemIcon>
-                <ListItemText primary="GPA Mentor (NA)" />
+                <ListItemText primary="GPA Mentor" />
             </ListItem>
           </Link>
           <Link to="/dashboard/add_drop" >
             <ListItem button>
                 <ListItemIcon><AddCircleIcon/></ListItemIcon>
-                <ListItemText primary="Add / Drop (NA)" />
+                <ListItemText primary="Add / Drop" />
             </ListItem>
           </Link>
           <Link to="/dashboard/histogram" >
@@ -200,6 +206,13 @@ const Drawere = ()  => {
           </Link>
           
         </List>
+        <Divider />
+        <Link to="/" >
+            <ListItem button onClick={logout}>
+                <ListItemIcon><ExitToAppIcon/></ListItemIcon>
+                <ListItemText primary="Sign Out" />
+            </ListItem>
+          </Link>
       </Drawer>
       
     </div>
