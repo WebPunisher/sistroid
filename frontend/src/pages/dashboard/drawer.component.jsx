@@ -183,7 +183,7 @@ const Drawere = ()  => {
           <Link to="/dashboard/myclasses" >
             <ListItem button>
                 <ListItemIcon><ClassIcon /></ListItemIcon>
-                <ListItemText primary="My Classes(" />
+                <ListItemText primary="My Classes" />
             </ListItem>
           </Link>
           <Link to="/dashboard/gpa_mentor" >

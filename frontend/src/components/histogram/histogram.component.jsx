@@ -1,15 +1,16 @@
-import React,{useState} from "react";
+import React,{ useState , useEffect } from "react";
 import './histogram.styles.scss';
 
 import { TextField } from '@material-ui/core';
 // import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
-import Select from 'react-select'
+import Select from 'react-select';
+import axios from '../../axios';
 
 const Histogram = props => {
     
     const baseURL = 'http://127.0.0.1:1999/'
-    const [imageUrl,setImageUrl] = useState(baseURL + '/crn_histogram/1')
+    const [imageUrl,setImageUrl] = useState('')
     const [crn,setCrn] = useState('')
     const [className,setClassName] = useState('')
     const [teacherId,setTeacherId] = useState()
