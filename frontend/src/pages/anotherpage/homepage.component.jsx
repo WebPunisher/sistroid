@@ -535,7 +535,6 @@ import talha from './assets/img/team/talha.jpg'
     </div>
   </footer>
 
-  {/* <div id="preloader"></div>    */}
     </div>
     )
 }
