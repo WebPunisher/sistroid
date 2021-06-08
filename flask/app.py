@@ -54,10 +54,36 @@ def create_tables():
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );''')    
     
+    cur.execute('''CREATE TABLE IF NOT EXISTS topic_letters (
+    class_name VARCHAR(6),
+    letter VARCHAR(3),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (class_name,letter),
+    foreign key (class_name)
+    references topics(class_name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+    );''')    
+    
+    cur.execute('''CREATE TABLE IF NOT EXISTS topic_restrictions (
+    class_name VARCHAR(6),
+    major VARCHAR(3),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (class_name,major),
+    foreign key (class_name)
+    references topics(class_name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+    );''')    
+    
     cur.execute('''CREATE TABLE IF NOT EXISTS classes (
     crn INT AUTO_INCREMENT PRIMARY KEY,
     c_teacher_id INT NOT NULL,
     c_class_name VARCHAR(6) NOT NULL,
+    capacity INT DEFAULT 0,
+    time varchar(255) DEFAULT 'TBA',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY(c_teacher_id)
@@ -102,8 +128,6 @@ def create_tables():
     ON DELETE CASCADE
     ON UPDATE CASCADE
     );''')       
-    
-    mysql.connection.commit()  
        
     cur.execute(
     '''
@@ -148,9 +172,17 @@ add_to_db_querries = {
                 INSERT INTO topics (class_name,class_desc,credits)
                 VALUES (%s,%s,%s); 
             ''' ,
-    "class": '''
-                INSERT INTO classes (c_class_name,c_teacher_id)
+    "topic_letter": '''
+                INSERT INTO topic_letters (class_name,letter)
                 VALUES (%s,%s); 
+            ''' ,
+    "topic_restriction": '''
+                INSERT INTO topic_restrictions (class_name,major)
+                VALUES (%s,%s); 
+            ''' ,
+    "class": '''
+                INSERT INTO classes (c_class_name,c_teacher_id,capacity,time)
+                VALUES (%s,%s,%s,%s); 
             ''' ,
     "enrollment": '''
                 INSERT INTO enrollment (student_id , crn)
@@ -292,6 +324,8 @@ def clear_all_tables():
     cur = mysql.connection.cursor()
     cur.execute( '''
             SET FOREIGN_KEY_CHECKS = 0;
+            drop table topic_restrictions;
+            drop table topic_letters;
             drop table people;
             drop table topics;
             drop table classes;
@@ -310,7 +344,7 @@ def deneme():
     with open('./seeddata.json') as json_file:
         cur = mysql.connection.cursor()
         data = json.load(json_file)
-        sample_majors = ["ISE","BLG"]
+        sample_majors = ["ISE","BLG","CHE"]
         
         cur.execute(add_to_db_querries["semester"],(2021,"spring","2021-01-28 20:53:41","2021-07-28 20:53:41"))
         cur.execute(add_to_db_querries["semester"],(2020,"spring","2020-01-28 20:53:41","2020-07-28 20:53:41"))
@@ -320,13 +354,23 @@ def deneme():
             cur.execute('''
                 INSERT INTO people (pname,psurname,major,mail,photo_url,password)
                 VALUES (%s,%s,%s,%s,%s,'5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'); 
-            ''',(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,1)], mail_adress, "https://thispersondoesnotexist.com/image"))
+            ''',(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,2)], mail_adress, "https://thispersondoesnotexist.com/image"))
         
         for i in data['topics']:
             cur.execute(add_to_db_querries["topic"],(i,"Temporary description",random.randint(2,4)))
+            
+            for letter in "asdfghjkl": #add random letters
+                if random.randint(0,9) > 7:
+                    cur.execute(add_to_db_querries["topic_letter"],(i,letter))
+                    
+            for major in sample_majors: #add random restrictions
+                if random.randint(0,9) > 5:
+                    cur.execute(add_to_db_querries["topic_restriction"],(i,major))
+            
         
         for i in range(40):
-            cur.execute(add_to_db_querries["class"],(data['topics'][i%30],i%9+1))
+            cur.execute(add_to_db_querries["class"],(data['topics'][i%30],i%9+1,30,
+                                                     ['mon','tue','wen','sat'][random.randint(0,3)]+' '+str(random.randint(9,18))+':00'))
                 
         cur.execute("update classes set created_at = '2020-05-30 20:26:38' where c_class_name < 'ISE300';")
 
@@ -409,14 +453,30 @@ def avaliable_classes():
     
     cur.execute(
     '''
-    select classes.crn,class_name,topics.credits,concat (teachers.pname,' ',teachers.psurname) as pname from classes 
+    select 
+    classes.crn,
+    class_name,
+    topics.credits,
+    concat (teachers.pname,' ',teachers.psurname) as pname,
+    classes.capacity - count(*) as remaining_capacity,
+    classes.time,
+    
+    (select Group_CONCAT(letter) from topic_letters
+    where topic_letters.class_name = classes.c_class_name) as letters,
+    (select Group_CONCAT(major) from topic_restrictions
+    where topic_restrictions.class_name = classes.c_class_name) as majors
+    
+    from classes 
     inner join topics on
     classes.c_class_name = topics.class_name
     inner join semesters on 
     (classes.created_at between end_date and start_date) and
     (current_timestamp() between end_date and start_date)
     inner join teachers on 
-    teachers.person_id = classes.c_teacher_id;
+    teachers.person_id = classes.c_teacher_id
+    inner join enrollment on 
+    enrollment.crn = classes.crn
+    group by enrollment.crn;
     ''')
     
     avaliable = cur.fetchall()
@@ -625,6 +685,7 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
 @app.route('/reset')
 @cross_origin()
 def reset_db():
+    create_tables()
     clear_all_tables()
     create_tables()
     deneme()
