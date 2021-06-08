@@ -6,7 +6,7 @@ import Class from '../class/class.component';
 
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
-
+import Available_Classes from '../available_classes/available_classes.component';
 
 
 const AddDrop = props => {
@@ -114,14 +114,12 @@ const AddDrop = props => {
         <button onClick={drop_selected}> Drop Selected Courses </button>
         {dropList.map(crn => <div>{crn}</div>)}
       </div>
-
       {ongoingClasses.map((e)=>{
-          return <Class class_name={e.class_name} credits={e.credits} crn={e.crn}></Class>
+        return <Class class_name={e.class_name} credits={e.credits} crn={e.crn}></Class>
       })}
-	  <h1> Avaliable classes </h1>
-	  {avaliableClasses.map((e)=>{
-          return <Class class_name={e.class_name} credits={e.credits} crn={e.crn} teacher={e.pname}></Class>
-      })}
+	  
+      <Available_Classes/>
+
     </div>
   );
 };

@@ -25,6 +25,7 @@ import ClassIcon from '@material-ui/icons/Class';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import EqualizerIcon from '@material-ui/icons/Equalizer';
+import ImportContactsTwoToneIcon from '@material-ui/icons/ImportContactsTwoTone';
 
 const drawerWidth = 240;
 
@@ -196,6 +197,12 @@ const Drawere = ()  => {
             <ListItem button>
                 <ListItemIcon><AddCircleIcon/></ListItemIcon>
                 <ListItemText primary="Add / Drop" />
+            </ListItem>
+          </Link>
+          <Link to="/dashboard/available_classes" >
+            <ListItem button>
+                <ListItemIcon><ImportContactsTwoToneIcon/></ListItemIcon>
+                <ListItemText primary="Available Classes" />
             </ListItem>
           </Link>
           <Link to="/dashboard/histogram" >
