@@ -357,7 +357,8 @@ def deneme():
             ''',(i.split(" ")[0],i.split(" ")[1], sample_majors[random.randint(0,2)], mail_adress, "https://thispersondoesnotexist.com/image"))
         
         for i in data['topics']:
-            cur.execute(add_to_db_querries["topic"],(i,"Temporary description",random.randint(2,4)))
+            random_topics=["Database Systems","Information Ethics","Computer Hardware","Software Engineering","IT Systems and Analysis","Operating Systems","Computer Networks","Introduction to Cloud","Web Programming","Backend Programming","Artificial Intelligence","Discrete Mathematics","Software Engineering Project","Distributed Systems Development","Information Systems Modelling"," Specification of Software Systems"," Software Evolution"," Software Quality"," Agile Methods","Data Integration and Analysis"]
+            cur.execute(add_to_db_querries["topic"],(i,random.choice(random_topics),random.randint(2,4)))
             
             for letter in "asdfghjkl": #add random letters
                 if random.randint(0,9) > 7:
@@ -446,9 +447,9 @@ def student_info(student_id):
    
     return response    
 
-@app.route('/avaliable_classes',methods = ["GET"])
+@app.route('/available_classes',methods = ["GET"])
 @cross_origin()
-def avaliable_classes():
+def available_classes():
     cur = mysql.connection.cursor()   
     
     cur.execute(
@@ -456,6 +457,7 @@ def avaliable_classes():
     select 
     classes.crn,
     class_name,
+    class_desc,
     topics.credits,
     concat (teachers.pname,' ',teachers.psurname) as pname,
     classes.capacity - count(*) as remaining_capacity,
@@ -479,21 +481,23 @@ def avaliable_classes():
     group by enrollment.crn;
     ''')
     
-    avaliable = cur.fetchall()
-    return jsonify(avaliable)
+    available = cur.fetchall()
+    return jsonify(available)
 
 def get_student_ongoing(student_id):
     cur = mysql.connection.cursor()   
     
     cur.execute(
     '''
-    select classes.crn,class_name,semester_season,semester_year,topics.credits from classes 
+    select classes.crn,class_name,concat (teachers.pname,' ',teachers.psurname) as pname,class_desc,semester_season,semester_year,topics.credits from classes 
     inner join enrollment on 
     classes.crn = enrollment.crn
     inner join topics on
     classes.c_class_name = topics.class_name
     inner join students on 
     students.person_id = enrollment.student_id
+    inner join teachers on 
+    teachers.person_id = classes.c_teacher_id
     inner join semesters on 
     (classes.created_at between end_date and start_date) and
     (current_timestamp() between end_date and start_date)
@@ -602,13 +606,13 @@ def crn_info(crn):
         return {"info": info,"students":students,"grades": grades,"class_average":get_avg_grade(grades, is_class=True)}
   
 
-def grade_search(quality_c, avaliable_c, classes, class_index = 0):
+def grade_search(quality_c, available_c, classes, class_index = 0):
     if quality_c <= 0:
         return classes,quality_c
-    if class_index >= len(classes) or avaliable_c <= 0:
+    if class_index >= len(classes) or available_c <= 0:
         return None,0
-    if avaliable_c < classes[class_index]["credits"]:
-        return grade_search(quality_c, avaliable_c,classes,class_index+1) #search next one
+    if available_c < classes[class_index]["credits"]:
+        return grade_search(quality_c, available_c,classes,class_index+1) #search next one
     
     for grade in list(grade_translation.keys())[::-1]:
         if grade >= classes[class_index]["grade"]: continue #if not greater than original continue
@@ -618,7 +622,7 @@ def grade_search(quality_c, avaliable_c, classes, class_index = 0):
         classes[class_index]["grade"] = grade
         quality_gain = (grade_translation[grade]-grade_translation[old_grade]) * classes[class_index]["credits"] * 0.25
         
-        result,q_c = grade_search(quality_c-quality_gain, avaliable_c-classes[class_index]["credits"],classes,class_index+1)
+        result,q_c = grade_search(quality_c-quality_gain, available_c-classes[class_index]["credits"],classes,class_index+1)
         if result:
             return result,q_c
         
@@ -626,19 +630,19 @@ def grade_search(quality_c, avaliable_c, classes, class_index = 0):
         
     return None,0
   
-@app.route('/mentor/<student_num>/<avaliable_credits>/<desired_gpa>')
+@app.route('/mentor/<student_num>/<available_credits>/<desired_gpa>')
 @cross_origin()
-def gpa_mentor(student_num,avaliable_credits,desired_gpa):
+def gpa_mentor(student_num,available_credits,desired_gpa):
     if not authenticate(request,student_num): return abort(401)
     
-    avaliable_credits = int(avaliable_credits)
+    available_credits = int(available_credits)
     desired_gpa = float(desired_gpa)
     
     #get the student data for current classes
     current = list(get_student_ongoing(student_num))   
     for cls in current:
         cls["grade"] = "FF" #presume FF to be base grade since these ones arenot graded yet
-    avaliable_credits += sum([i["credits"] for i in current])    
+    available_credits += sum([i["credits"] for i in current])    
     
     #data procurement
     grades = get_student_grades(student_num)
@@ -649,17 +653,17 @@ def gpa_mentor(student_num,avaliable_credits,desired_gpa):
     
     #required quality credit calculation
     quality_credits = total_credits * gpa * 0.25
-    desired_quality_credits = (total_credits+avaliable_credits) * desired_gpa * 0.25
+    desired_quality_credits = (total_credits+available_credits) * desired_gpa * 0.25
     required_quality_credits = desired_quality_credits - quality_credits
     
-    #check improveable classes (only matters if avaliable credits > 0)
+    #check improveable classes (only matters if available credits > 0)
     improveable = [grade for grade in grades if grade["grade"] > "CB"]
     improveable.sort(key = lambda x: x["grade"], reverse=True)
     improveable = improveable[:4] #take 4 lowest grades below CC
     
     
-    new_grades,q_c = grade_search(required_quality_credits,avaliable_credits,deepcopy(current+improveable))
-    new_gpa = ((quality_credits+required_quality_credits-q_c)/(total_credits+avaliable_credits))*4
+    new_grades,q_c = grade_search(required_quality_credits,available_credits,deepcopy(current+improveable))
+    new_gpa = ((quality_credits+required_quality_credits-q_c)/(total_credits+available_credits))*4
     
     if new_gpa >= desired_gpa and new_grades:
         changed_grades = []

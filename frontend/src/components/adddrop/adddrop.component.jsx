@@ -14,20 +14,18 @@ const AddDrop = props => {
   const [addList,setAddList] = useState(['','',''])
   const [dropList,setDropList] = useState(['','',''])
   const [ongoingClasses,setOngoingClasses] = useState([])
-  const [avaliableClasses,setAvaliableClasses] = useState([])
 
   const pull_student_info = () =>
   {
 	axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}).then( res =>{
+        console.log(res.data.ongoing_classes)
         setOngoingClasses(res.data.ongoing_classes)
     })
   }
 
   useEffect(()=>{
     pull_student_info()
-	axios.get('/avaliable_classes').then( res =>{
-        setAvaliableClasses(res.data)
-    })
+	
   },[]) ;
 
   const increase = ( type ) => {
@@ -115,7 +113,7 @@ const AddDrop = props => {
         {dropList.map(crn => <div>{crn}</div>)}
       </div>
       {ongoingClasses.map((e)=>{
-        return <Class class_name={e.class_name} credits={e.credits} crn={e.crn}></Class>
+        return <Class class_name={e.class_name} credits={e.credits} crn={e.crn} class_desc={e.class_desc}></Class>
       })}
 	  
       <Available_Classes/>

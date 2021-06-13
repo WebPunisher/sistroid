@@ -26,6 +26,7 @@ const GpaMentor = props => {
 			.then
 			(
 				(response) => {
+					console.log(response.data)
 					set_gpa_data(response.data);
 					setFetching(false)
 				}
@@ -35,7 +36,7 @@ const GpaMentor = props => {
   return (
     <div className="gpamentor">
         WELCOME TO THE GPA MENTOR  <br/>
-		 <TextField className="myTextField" onChange={ e => set_credits(e.target.value)} id="standard-basic" label=" Avaliable credits" />
+		 <TextField className="myTextField" onChange={ e => set_credits(e.target.value)} id="standard-basic" label=" Available credits" />
 		 <TextField className="myTextField" onChange={ e => set_gpa(e.target.value)} id="standard-basic" label=" Desired gpa" />
 		 <Button className="searchButton" variant="contained" onClick = {Fetch_mentor_info}> Enter </Button>
 

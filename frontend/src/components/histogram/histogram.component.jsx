@@ -80,7 +80,7 @@ const Histogram = props => {
                 <Button className="searchButton" variant="contained" onClick={urlSetter}   > Search </Button>
             </div>
         </div>
-        {imageUrl ? <img src = { imageUrl } alt="No such histogram" className="histogramImage" /> : null}
+        {imageUrl ? <img src = { imageUrl } alt="No such histogram" className="histogramImage" /> : null }
        
     </div>
   );
