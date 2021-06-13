@@ -7,6 +7,8 @@ import Class from '../class/class.component';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import Available_Classes from '../available_classes/available_classes.component';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 
 
 const AddDrop = props => {
@@ -14,17 +16,19 @@ const AddDrop = props => {
   const [addList,setAddList] = useState(['','',''])
   const [dropList,setDropList] = useState(['','',''])
   const [ongoingClasses,setOngoingClasses] = useState([])
+  const [fetching,setFetching] = useState(false)
 
-  const pull_student_info = () =>
+  const pull_student_info = async () =>
   {
 	axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}).then( res =>{
-        console.log(res.data.ongoing_classes)
+        console.log("ongoing classes=",res.data.ongoing_classes)
         setOngoingClasses(res.data.ongoing_classes)
     })
   }
 
   useEffect(()=>{
     pull_student_info()
+
 	
   },[]) ;
 
@@ -59,23 +63,33 @@ const AddDrop = props => {
     }
   }
 
-  const drop_selected = () => {
-    dropList.map(crn => 
-		axios.delete(`/student_remove_enrollment/${sessionStorage.getItem('id')}/${crn}`,
-			{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}
-		)
-	)
-	pull_student_info();
+  const sleep = m => new Promise(r => setTimeout(r, m))
+
+  const drop_selected =  async () => {
+    setFetching(true)
+    console.log("hi")
+    dropList.forEach(crn =>
+      axios.delete(`/student_remove_enrollment/${sessionStorage.getItem('id')}/${crn}`,
+        {headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}
+      )
+	  )
+    console.log("waiting")
+    await sleep(1000)
+    console.log("finished")
+  	pull_student_info().then(setFetching(false))
   }
 
-  const add_selected = () => {
-    addList.map(crn => 
+  const add_selected = async  () => {
+    addList.forEach(crn => 
 		axios.post(`/add_enrollment`,
 				{id:sessionStorage.getItem('id'),"crn":crn},
 				{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}}
-		)
-	)
-	pull_student_info();
+		  )
+	  ) 
+    console.log("waiting")
+    await sleep(1000)
+    console.log("finished")
+  	pull_student_info().then(setFetching(false))
   }
 
   return (
@@ -112,9 +126,9 @@ const AddDrop = props => {
         <button onClick={drop_selected}> Drop Selected Courses </button>
         {dropList.map(crn => <div>{crn}</div>)}
       </div>
-      {ongoingClasses.map((e)=>{
+      { fetching ? <CircularProgress  size="5rem"/> : ongoingClasses.map((e)=>{
         return <Class class_name={e.class_name} credits={e.credits} crn={e.crn} class_desc={e.class_desc}></Class>
-      })}
+      }) }
 	  
       <Available_Classes/>
 
