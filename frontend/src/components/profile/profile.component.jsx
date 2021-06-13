@@ -39,11 +39,11 @@ const Profile = props => {
           {/* <img src={info.photo_url} className="profileImage" alt="profileImage"/> */}
           <div className="generalInfo">
               <div className="infoHeader"> General Information </div>
-              <div className="profileInput"><span >Name  &emsp;&emsp;&emsp;&emsp;</span>{info.pname} {info.psurname} </div>
-              <div className="profileInput"><span >Student Status &emsp;&emsp;</span>  Active </div>
+              <div className="profileInput"><span >Name  &emsp;&emsp;&emsp;</span>{info.pname} {info.psurname} &emsp; </div>
+              <div className="profileInput"><span >Student Status &emsp;&emsp;</span>  Active  &emsp;</div>
               <div className="profileInput"><span>Class Standings &emsp;&nbsp;</span>  Sophomore &emsp; </div>
-              <div className="profileInput"><span>Major </span> &emsp;&emsp;&emsp;&emsp; {info.major ==='BLG' ? <span className="antispan">Computer Enginnering</span> : null}    </div>
-              <div className="profileInput"><span >Age</span> &emsp;&emsp;&emsp;&emsp; 22    </div>
+              <div className="profileInput"><span>Major </span> &emsp;&emsp;&emsp; {info.major ==='BLG' ? <span className="antispan">Computer Enginnering&emsp;</span> : <span className="antispan">Information Systems Engineering&emsp;</span> }    </div>
+              <div className="profileInput"><span >Age</span> &emsp;&emsp;&emsp; 22    </div>
           </div>
           <div className="contactInfo">
               <div className="infoHeader"> Contact Information </div>

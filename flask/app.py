@@ -384,7 +384,7 @@ def deneme():
     
         for enrol in crn_dict:
             for crn_num in crn_dict[enrol]:
-                cur.execute(add_to_db_querries["grade"],(enrol,list(grade_translation.keys())[random.randint(0,7)],crn_num))
+                cur.execute(add_to_db_querries["grade"],(enrol,list(grade_translation.keys())[min(random.randint(3,7),random.randint(0,7))],crn_num))
 
         cur.execute("""
         delete grades from grades,classes 
