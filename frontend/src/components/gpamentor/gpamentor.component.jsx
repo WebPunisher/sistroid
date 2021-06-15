@@ -8,9 +8,11 @@ import axios from '../../axios';
 
 const GpaMentor = props => {
   
-  const [fetching,setFetching] = useState()
+  const [fetchingMentor,setFetchingMentor] = useState()
+  const [fetchingGrades,setFetchingGrades] = useState(true)
   const [gpa,set_gpa] = useState(4)
   const [credits,set_credits] = useState(0)
+  const [classes,setClasses] = useState([])
 
   const [gpa_data,set_gpa_data] = useState({
 	old_grades : [],
@@ -20,18 +22,43 @@ const GpaMentor = props => {
     required_quality_credits : ""
   })
 
+  useEffect(()=>{
+	axios.get(`/student_info/${sessionStorage.getItem('id')}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}})
+	.then( res =>{
+		setFetchingGrades(true)
+		console.log(res.data)
+		let arr=[]
+		res.data.grades.forEach( item => {
+			arr.push({name:item.class_name,grade:item.grade})
+		})
+		res.data.ongoing_classes.forEach( item => {
+			arr.push({name:item.class_name,grade:""})
+		});
+		setClasses(arr)
+	    setFetchingGrades(false)
+	})
+  },[]) ;
+
+
   const Fetch_mentor_info = () => {
-		setFetching(true)
+		setFetchingMentor(true)
 		axios.get(`/mentor/${sessionStorage.getItem('id')}/${credits}/${gpa}`,{headers:{id:sessionStorage.getItem('id'),token:sessionStorage.getItem('token')}})
 			.then
 			(
 				(response) => {
 					console.log(response.data)
 					set_gpa_data(response.data);
-					setFetching(false)
+					setFetchingMentor(false)
 				}
 			);
 	}
+
+  const stateChanger = (index,value) => {
+	let newArr = [...classes]; 
+    newArr[index].grade = value; 
+
+    setClasses(newArr); 
+  }
 
   return (
     <div className="gpamentor">
@@ -40,7 +67,7 @@ const GpaMentor = props => {
 		 <TextField className="myTextField" onChange={ e => set_gpa(e.target.value)} id="standard-basic" label=" Desired gpa" />
 		 <Button className="searchButton" variant="contained" onClick = {Fetch_mentor_info}> Enter </Button>
 
-		{ fetching ? <div><CircularProgress/></div> :
+		{ fetchingMentor ? <div><CircularProgress/></div> :
 		 <div>
 			 <p> old gpa: {gpa_data.old_gpa} </p>
 			<ul>
@@ -52,6 +79,19 @@ const GpaMentor = props => {
 				{gpa_data.new_grades.map((grade) => <li> {grade.class_name}, required grade = {grade.grade} </li>)}
 			</ul>
 		 </div>}
+
+		{ fetchingGrades ? <div><CircularProgress/></div> : 
+
+			<div>
+				{classes.map( item =>
+				  <div> {item.name} ==== 
+					<input value={classes[classes.findIndex(x => x.name === item.name)].grade} onChange={(e)=>stateChanger(classes.findIndex(x => x.name === item.name),e.target.value)}/>
+					{classes[classes.findIndex(x => x.name === item.name)].grade}
+				  </div>)
+				}
+			</div>
+		
+		}
 		 
     </div>
   );

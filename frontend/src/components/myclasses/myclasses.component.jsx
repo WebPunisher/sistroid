@@ -58,9 +58,9 @@ const MyClasses = () => {
 
     return (
         
-        <div>
+        <div className="myClasses">
             
-            {fetching ? <CircularProgress className="availableClassesCirc" size="8rem"/>:
+            {fetching ? <CircularProgress className="myClassesCirc" size="8rem"/>:
             <div>
                 <h1>Ongoing Classes</h1>
                 <div style={{ height: 700, width: '100%',padding:30 }}>
