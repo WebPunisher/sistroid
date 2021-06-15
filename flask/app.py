@@ -413,6 +413,18 @@ def get_avg_grade(grades, is_class=False):
     return quality_credits/total_credits
     
     
+@app.route('/gpa_calculator', methods = ["POST"])
+@cross_origin()
+def gpa_calculator():
+   
+    credits=0
+    weight=0
+    for i in request.json['classes']:
+        credits+= i['credits']
+        weight+= i['credits'] * grade_translation[i['grade']]
+    response = jsonify({"new_gpa":weight/credits})    
+    return response
+
 @app.route('/ranking/<major>',methods = ["GET"])
 @cross_origin()
 def get_ranking(major):

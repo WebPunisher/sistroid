@@ -41,7 +41,7 @@ const SignIn= () => {
   }
   const sleep = m => new Promise(r => setTimeout(r, m))
   const login = ()  => {
-    console.log("sending name"+studentNumber)
+    console.log("sending number"+studentNumber)
     if(checkValidity()){
       axios.post('/login', {
         number: Number(studentNumber),
