@@ -1,5 +1,6 @@
 import React,{useState} from "react";
 import axios from '../../axios';
+import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faEnvelope, faUnlockAlt } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
@@ -18,7 +19,7 @@ const SignUp = () => {
   const [checkPass,setCheckPass] = useState()
   const [major,setMajor] = useState('ISE')
   const photoURL="no"
-
+  const history = useHistory();
   const checkValidity = () => {
     if(name === "" || surname === "" || password==="" || checkPass==="" ){
       alert("At least one of the inputs is empty")
@@ -30,7 +31,7 @@ const SignUp = () => {
       return true
     }
   }
-  // const sleep = m => new Promise(r => setTimeout(r, m))
+  const sleep = m => new Promise(r => setTimeout(r, m))
   const register = () => {
     if(checkValidity()){
       axios.post('/register', {
@@ -43,6 +44,8 @@ const SignUp = () => {
       })
       .then( async (response) => {
         console.log(response);
+        await sleep(500)
+        history.push("/dashboard");
       }, (error) => {
         console.log(error);
       });
