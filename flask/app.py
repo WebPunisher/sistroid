@@ -222,7 +222,7 @@ def register():
     cur.execute("update people set password = %s where person_id = (SELECT LAST_INSERT_ID());", (password,))
     cur.execute("SELECT LAST_INSERT_ID() as id;")
     
-    session_key = str(get_random_bytes(32))
+    session_key = get_random_bytes(32).hex()
     id_num = cur.fetchone()["id"]
     sessions[id_num] = session_key
     mysql.connection.commit()  
