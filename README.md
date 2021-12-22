@@ -29,22 +29,22 @@ browser.
 
   ## Backend API ( Application Programming Interface )  
   
-  /create_tables = Creates all the database tables . Used for development purpose and initialization.  
-  /clear_tables = Removes all the tables from database. Used for development purposes  
-  /seed = Randomly seeds the database with the data taken from seeddata.json file . Used to generate example data for the database.  
-  /gpa_calculator = Calculates the gpa taking the classes and the grades as input. Returns the calculated gpa.  
-  /ranking/<major> = Queries the database to get the ranking of the students from the specified major in terms of GPA. Returns the ranking that includes the name and the gpa of the students.  
-  /student_info/<student_id> = Queries the database to get personal information, classes , gpa, and grades of the student specified with the student id.  
-  /available_classes = Queries the database to fetch the classes that are available for the current semester. Returns the classes list that include information such as credits, time, crn, teacher_name, letters, and major restrictions for each class.  
-  /crn_info/<crn> = Fetches and returns the general information, students enrolled, grades, and class average information for the class with the specified crn.  
-  /mentor/<student_num>/<available_credits>/<desired_gpa> = Takes the current situation of the student as input and makes calculations to check if the student can reach desired gpa in the current status. Returns the solution if there is one, returns a message if not.  
+  - /create_tables = Creates all the database tables . Used for development purpose and initialization.  
+  - /clear_tables = Removes all the tables from database. Used for development purposes  
+  - /seed = Randomly seeds the database with the data taken from seeddata.json file . Used to generate example data for the database.  
+  - /gpa_calculator = Calculates the gpa taking the classes and the grades as input. Returns the calculated gpa.  
+  - /ranking/<major> = Queries the database to get the ranking of the students from the specified major in terms of GPA. Returns the ranking that includes the name and the gpa of the students.  
+  - /student_info/<student_id> = Queries the database to get personal information, classes , gpa, and grades of the student specified with the student id.  
+  - /available_classes = Queries the database to fetch the classes that are available for the current semester. Returns the classes list that include information such as credits, time, crn, teacher_name, letters, and major restrictions for each class.  
+  - /crn_info/<crn> = Fetches and returns the general information, students enrolled, grades, and class average information for the class with the specified crn.  
+  - /mentor/<student_num>/<available_credits>/<desired_gpa> = Takes the current situation of the student as input and makes calculations to check if the student can reach desired gpa in the current status. Returns the solution if there is one, returns a message if not.  
 
-  ## **Histogram Endpoints ** 
+  ## **Histogram Endpoints**
 
-  /crn_histogram/<crn>  
-  /class_histogram/<class_name>  
-  /teacher_histogram/<person_id>  
-  /teacher_class_histogram/<person_id>/<class_id>  
+  - /crn_histogram/<crn>  
+  - /class_histogram/<class_name>  
+  - /teacher_histogram/<person_id>  
+  - /teacher_class_histogram/<person_id>/<class_id>  
   
 The four histogram endpoint given above fetches the related information from the
 database with queries. Then uses multimedia functions importing the cv2 library
@@ -52,25 +52,25 @@ and generates a jpeg file with the given data. Generated jpeg file is returned t
 the frontend to be displayed there.  
 
   ## **React Components**  
-  ● add_drop  
-    ○ Shows ongoing classes and include available_classes  
-    ○ Takes the classes CRNs to drop or add as input and make the necessary API call to the backend server as a POST request  
-  ● available_classes  
-    ○ Fetches classes that are available for the current semester in a list format with filters and properties such as teacher name, crn, semester, etc.  
-  ● class  
-    ○ A component to display properties of a class, takes class_name, class_description, credits, teacher_name, crn, and semester as props.  
-  ● gpamentor  
-    ○ Fetches the gpa and the old classes of the student  
-    ○ Takes the desired gpa and available credits as input and provides a possible scenario to achieve desired gpa.  
-  ● histogram  
-    ○ Takes teacher_id, class_name, crn, or their combinations and displays the histogram related to the input. The histogram is created in the
+  -  add_drop  
+     -  Shows ongoing classes and include available_classes  
+     -  Takes the classes CRNs to drop or add as input and make the necessary API call to the backend server as a POST request  
+  -  available_classes  
+     - Fetches classes that are available for the current semester in a list format with filters and properties such as teacher name, crn, semester, etc.  
+  -  class  
+     - A component to display properties of a class, takes class_name, class_description, credits, teacher_name, crn, and semester as props.  
+  -  gpamentor  
+     - Fetches the gpa and the old classes of the student  
+     - Takes the desired gpa and available credits as input and provides a possible scenario to achieve desired gpa.  
+  -  histogram  
+     - Takes teacher_id, class_name, crn, or their combinations and displays the histogram related to the input. The histogram is created in the
     backend, the component just request it and display the response histogram.  
-  ● myclasses  
-    ○ Fetches old classes and ongoing classes of the student  
-    ○ Display the classes in a list format with filters in every property to make lookup faster and easier.  
-  ● profile  
-    ○ Fetches the student’s personal information, contact information, and image.  
-    ○ Displays the information in an editable format for contact information such as phone number, and non-editable format for general information such as major and age.  
-  ● ranking  
-    ○ Fetches the ranking of the students in terms of their GPA from all majors  
-    ○ Provides a filter for the major  
+  -  myclasses  
+     - Fetches old classes and ongoing classes of the student  
+     - Display the classes in a list format with filters in every property to make lookup faster and easier.  
+  -  profile  
+     - Fetches the student’s personal information, contact information, and image.  
+     - Displays the information in an editable format for contact information such as phone number, and non-editable format for general information such as major and age.  
+  -  ranking  
+     - Fetches the ranking of the students in terms of their GPA from all majors  
+     - Provides a filter for the major  
