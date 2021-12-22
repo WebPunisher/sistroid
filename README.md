@@ -14,7 +14,7 @@ After cloning, change to the frontend directory and follow the steps given below
 start the frontend server on localhost at port 3000.
 
     ● yarn install  => to install dependency packages
-    ● yarn run      => to run the frontend server
+    ● yarn start    => to start the frontend server
     
 After that, change to the flask directory to start the backend server. Note that the
 backend server runs on port 1999 as default.
