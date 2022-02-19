@@ -1,32 +1,36 @@
-.histogram{
-    
-    
-    .searcHistogram{
-        text-align: center;
-        display: flex;
-        justify-content: center;
+.histogram {
+  .searcHistogram {
+    text-align: center;
+    display: flex;
+    justify-content: center;
 
-        margin-right: 25px;
-        .major-select{
-            width: 20%;
-            margin: 10px;
-        }
-        
-        .buttonParent{
-            margin: 10px;
-        }
-        .searchButton{
-            display: inline-block;
-        }
+    margin-right: 25px;
+    .major-select {
+      width: 20%;
+      margin: 10px;
     }
 
-    .histogramImage{
-        margin-top: 70px;
-        margin-left: 10%;
-        width: 600px;
+    .buttonParent {
+      margin: 10px;
     }
+    .searchButton {
+      display: inline-block;
+    }
+  }
 
-    .myTextField{
-        display: inline-flex;
-    }
+  .histogramImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    // margin-top: 70px;
+    // margin-left: 30%;
+    // margin-right: 30%;
+    // width: 600px;
+    // text-align: center;
+  }
+
+  .myTextField {
+    display: inline-flex;
+  }
 }
