@@ -7,6 +7,26 @@ database. It is built to provide a smooth user experience to the students with a
 modern user interface. The project source code is maintained in GitHub as an open
 source project. Related github link is https://github.com/WebPunisher/sistroid
 
+- URL for the detailed report: https://github.com/webbbers/sistroid/blob/main/frontend/src/assets/img/SIS_Report.pdf
+
+---
+Below you can see the workflow of the application:
+![Application Workflow](https://github.com/unsel/cryptowatcher/blob/main/src/images/workflow.png)
+---
+Below you can see the conttinous deployment mechanism:
+![Continuous Deployment](https://github.com/unsel/cryptowatcher/blob/main/src/images/cd.png)
+---
+https://github.com/webbbers/sistroid/blob/main/frontend/src/assets/img/add_drop.png
+---
+https://github.com/webbbers/sistroid/blob/main/frontend/src/assets/img/available_classes.png
+---
+https://github.com/webbbers/sistroid/blob/main/frontend/src/assets/img/histogram.png
+---
+https://github.com/webbbers/sistroid/blob/main/frontend/src/assets/img/ongoing_classes.png
+---
+https://github.com/webbbers/sistroid/blob/main/frontend/src/assets/img/workflow.png
+---
+
   ## Installation Instructions  
 Clone down the repository using the link given above with the .git extension. Make
 sure to have node and npm installed on your machine to run the project properly.
